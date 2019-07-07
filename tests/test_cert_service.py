@@ -60,6 +60,38 @@ class TestCertService(unittest.TestCase):
 
         CertService.verify_cert_pkey(cert, pkey)
 
+    def test_build_server(self):
+        ca_cert = CertService.load_cert(os.path.join(data_folder, 'openvpn-ca/keys/ca.crt'))
+        ca_pkey = CertService.load_pkey(os.path.join(data_folder, 'openvpn-ca/keys/ca.key'))
+
+        now = datetime.utcnow()
+        valid_time = timedelta(days=3650)
+
+        pkey, cert = CertService.build_server(
+            BuildPKeyParams(2048),
+            BuildX509Params(
+                uuid.uuid4().int,
+                now,
+                now + valid_time,
+                dict(
+                    countryName='AU',
+                    stateOrProvinceName='NSW',
+                    localityName='Sydney',
+                    organizationName='UNSW',
+                    organizationalUnitName='Knowledge Graph Group',
+                    commonName='test-server',
+                    emailAddress='yukai.miao@unsw.edu.au',
+                    name='server'
+                )),
+            ca_cert, ca_pkey
+        )
+
+        print(cert.dump_text())
+        print(pkey)
+
+        CertService.verify_cert_pkey(cert, pkey)
+        CertService.verify_cert_ca(cert, ca_cert)
+
     def test_build_client(self):
         ca_cert = CertService.load_cert(os.path.join(data_folder, 'openvpn-ca/keys/ca.crt'))
         ca_pkey = CertService.load_pkey(os.path.join(data_folder, 'openvpn-ca/keys/ca.key'))

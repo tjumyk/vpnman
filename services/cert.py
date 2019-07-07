@@ -231,7 +231,7 @@ class CertService:
         return PrivateKey(key), Cert(cert)
 
     @classmethod
-    def build_client(cls, pkey_params: BuildPKeyParams, x509_params: BuildX509Params,
+    def build_server(cls, pkey_params: BuildPKeyParams, x509_params: BuildX509Params,
                      ca_cert: Cert, ca_pkey: PrivateKey) -> Tuple[PrivateKey, Cert]:
         key = cls._build_pkey(pkey_params)
         cert = cls._build_x509(x509_params)
@@ -255,6 +255,39 @@ class CertService:
         cert.add_extensions([
             crypto.X509Extension(b'extendedKeyUsage', False, b'serverAuth'),
             crypto.X509Extension(b'keyUsage', False, b'digitalSignature,keyEncipherment'),
+            crypto.X509Extension(b'subjectAltName', False, subject_alt_name.encode())
+        ])
+
+        # noinspection PyTypeChecker
+        # sign() function has wrong type annotation for 'digest'
+        # use CA key to sign
+        cert.sign(ca_pkey.pkey, cls.default_digest)
+        return PrivateKey(key), Cert(cert)
+
+    @classmethod
+    def build_client(cls, pkey_params: BuildPKeyParams, x509_params: BuildX509Params,
+                     ca_cert: Cert, ca_pkey: PrivateKey) -> Tuple[PrivateKey, Cert]:
+        key = cls._build_pkey(pkey_params)
+        cert = cls._build_x509(x509_params)
+        cert.set_pubkey(key)
+
+        # use CA as issuer
+        cert.set_issuer(ca_cert.x509.get_subject())
+
+        # have to add extensions in multiple steps
+        cert.add_extensions([
+            crypto.X509Extension(b'basicConstraints', False, b'CA:FALSE'),
+            crypto.X509Extension(b'nsComment', False, b'Python Generated Server Certificate'),
+            crypto.X509Extension(b'subjectKeyIdentifier', False, b'hash', subject=cert)
+        ])
+        cert.add_extensions([
+            # use CA as authority/issuer
+            crypto.X509Extension(b'authorityKeyIdentifier', False, b'keyid:always,issuer:always', issuer=ca_cert.x509)
+        ])
+        subject_alt_name = 'DNS:%s' % cert.get_subject().commonName
+        cert.add_extensions([
+            crypto.X509Extension(b'extendedKeyUsage', False, b'clientAuth'),
+            crypto.X509Extension(b'keyUsage', False, b'digitalSignature'),
             crypto.X509Extension(b'subjectAltName', False, subject_alt_name.encode())
         ])
 
