@@ -75,7 +75,7 @@ class Cert:
         return crypto.dump_certificate(crypto.FILETYPE_TEXT, self._x509).decode()
 
 
-class PrivateKey:
+class PKey:
     def __init__(self, pkey: crypto.PKey):
         self._pkey = pkey
 
@@ -152,13 +152,13 @@ class CertService:
             raise CertServiceError('cert load failed', e.args[0])
 
     @staticmethod
-    def load_pkey(pkey_data: bytes, passphrase=None) -> PrivateKey:
+    def load_pkey(pkey_data: bytes, passphrase=None) -> PKey:
         if not pkey_data:
             raise CertServiceError('pkey data must not be empty')
 
         try:
             pkey = crypto.load_privatekey(crypto.FILETYPE_PEM, pkey_data, passphrase)
-            return PrivateKey(pkey)
+            return PKey(pkey)
         except crypto.Error as e:
             raise CertServiceError('pkey load failed', e.args[0])
 
@@ -186,7 +186,7 @@ class CertService:
         return cls.load_cert(buffer)
 
     @classmethod
-    def load_pkey_file(cls, pkey_path: str, passphrase=None) -> PrivateKey:
+    def load_pkey_file(cls, pkey_path: str, passphrase=None) -> PKey:
         if not pkey_path:
             raise CertServiceError('pkey path is required')
         if not os.path.exists(pkey_path):
@@ -220,7 +220,7 @@ class CertService:
             raise CertServiceError('CA does not match', e.args[0])
 
     @classmethod
-    def verify_cert_pkey(cls, cert: Cert, pkey: PrivateKey):
+    def verify_cert_pkey(cls, cert: Cert, pkey: PKey):
         if cert is None:
             raise CertServiceError('cert is required')
         if pkey is None:
@@ -254,7 +254,7 @@ class CertService:
         return cert
 
     @classmethod
-    def build_ca(cls, pkey_params: BuildPKeyParams, x509_params: BuildX509Params) -> Tuple[PrivateKey, Cert]:
+    def build_ca(cls, pkey_params: BuildPKeyParams, x509_params: BuildX509Params) -> Tuple[PKey, Cert]:
         key = cls._build_pkey(pkey_params)
         cert = cls._build_x509(x509_params)
         cert.set_pubkey(key) # key is a key pair
@@ -280,11 +280,11 @@ class CertService:
         # sign() function has wrong type annotation for 'digest'
         # use own key to sign
         cert.sign(key, cls.default_digest)
-        return PrivateKey(key), Cert(cert)
+        return PKey(key), Cert(cert)
 
     @classmethod
     def build_server(cls, pkey_params: BuildPKeyParams, x509_params: BuildX509Params,
-                     ca_cert: Cert, ca_pkey: PrivateKey) -> Tuple[PrivateKey, Cert]:
+                     ca_cert: Cert, ca_pkey: PKey) -> Tuple[PKey, Cert]:
         key = cls._build_pkey(pkey_params)
         cert = cls._build_x509(x509_params)
         cert.set_pubkey(key)  # key is a key pair
@@ -314,11 +314,11 @@ class CertService:
         # sign() function has wrong type annotation for 'digest'
         # use CA key to sign
         cert.sign(ca_pkey.pkey, cls.default_digest)
-        return PrivateKey(key), Cert(cert)
+        return PKey(key), Cert(cert)
 
     @classmethod
     def build_client(cls, pkey_params: BuildPKeyParams, x509_params: BuildX509Params,
-                     ca_cert: Cert, ca_pkey: PrivateKey) -> Tuple[PrivateKey, Cert]:
+                     ca_cert: Cert, ca_pkey: PKey) -> Tuple[PKey, Cert]:
         key = cls._build_pkey(pkey_params)
         cert = cls._build_x509(x509_params)
         cert.set_pubkey(key)  # key is a key pair
@@ -347,10 +347,10 @@ class CertService:
         # sign() function has wrong type annotation for 'digest'
         # use CA key to sign
         cert.sign(ca_pkey.pkey, cls.default_digest)
-        return PrivateKey(key), Cert(cert)
+        return PKey(key), Cert(cert)
 
     @classmethod
-    def build_crl(cls, cert_revoke_list: Iterable[Tuple[Cert, datetime]], ca_cert: Cert, ca_pkey: PrivateKey,
+    def build_crl(cls, cert_revoke_list: Iterable[Tuple[Cert, datetime]], ca_cert: Cert, ca_pkey: PKey,
                   validity_days: int):
         crl = crypto.CRL()
         crl.set_version(0x0)

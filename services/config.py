@@ -2,7 +2,7 @@ import os
 from typing import List
 
 from error import BasicError
-from services.cert import PrivateKey, Cert
+from services.cert import PKey, Cert
 
 
 class ConfigServiceError(BasicError):
@@ -26,7 +26,7 @@ class ConfigService:
         return full_config
 
     @staticmethod
-    def build_client_config(base_config_path: str, ca_cert: Cert, client_cert: Cert, client_pkey: PrivateKey,
+    def build_client_config(base_config_path: str, ca_cert: Cert, client_cert: Cert, client_pkey: PKey,
                             tls_auth_key_path: str, additional_lines: List[str] = None):
         if not base_config_path:
             raise ConfigServiceError('base config path is required')
