@@ -3,11 +3,12 @@
 # - https://www.pyopenssl.org/en/stable/api/crypto.html
 # - https://www.openssl.org/docs/manmaster/man5/x509v3_config.html
 # - https://www.digitalocean.com/community/tutorials/how-to-set-up-an-openvpn-server-on-ubuntu-16-04
+# - https://tools.ietf.org/html/rfc5280#section-6.3.2
 
 import os
 import uuid
 from datetime import datetime, timedelta
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Iterable
 
 from OpenSSL import crypto
 
@@ -96,6 +97,21 @@ class PrivateKey:
         return crypto.dump_privatekey(crypto.FILETYPE_TEXT, self._pkey).decode()
 
 
+class CRL:
+    def __init__(self, crl: crypto.CRL):
+        self._crl = crl
+
+    @property
+    def crl(self) -> crypto.CRL:
+        return self._crl
+
+    def dump(self) -> str:
+        return crypto.dump_crl(crypto.FILETYPE_PEM, self._crl).decode()
+
+    def dump_text(self) -> str:
+        return crypto.dump_crl(crypto.FILETYPE_TEXT, self._crl).decode()
+
+
 class BuildX509Params:
     def __init__(self,
                  serial_number: int = None,
@@ -146,6 +162,17 @@ class CertService:
         except crypto.Error as e:
             raise CertServiceError('pkey load failed', e.args[0])
 
+    @staticmethod
+    def load_crl(crl_data: bytes) -> CRL:
+        if not crl_data:
+            raise CertServiceError('crl data must not be empty')
+
+        try:
+            crl = crypto.load_crl(crypto.FILETYPE_PEM, crl_data)
+            return CRL(crl)
+        except crypto.Error as e:
+            raise CertServiceError('crl load failed', e.args[0])
+
     @classmethod
     def load_cert_file(cls, cert_path: str) -> Cert:
         if not cert_path:
@@ -169,6 +196,18 @@ class CertService:
             buffer = f.read()
 
         return cls.load_pkey(buffer, passphrase)
+
+    @classmethod
+    def load_crl_file(cls, crl_path: str) -> CRL:
+        if not crl_path:
+            raise CertServiceError('crl path is required')
+        if not os.path.exists(crl_path):
+            raise CertServiceError('crl does not exist')
+
+        with open(crl_path, 'rb') as f:
+            buffer = f.read()
+
+        return cls.load_crl(buffer)
 
     @staticmethod
     def verify_cert_ca(cert: Cert, ca_cert: Cert):
@@ -309,3 +348,30 @@ class CertService:
         # use CA key to sign
         cert.sign(ca_pkey.pkey, cls.default_digest)
         return PrivateKey(key), Cert(cert)
+
+    @classmethod
+    def build_crl(cls, cert_revoke_list: Iterable[Tuple[Cert, datetime]], ca_cert: Cert, ca_pkey: PrivateKey,
+                  validity_days: int):
+        crl = crypto.CRL()
+        crl.set_version(0x0)
+
+        # The set_nextUpdate() method fails because the pointer to the nextUpdate date object inside of this call is
+        # NULL. So we have to use the ugly export() function instead of sign() to overcome this bug without accessing
+        # the internal functions of the crypto module.
+        #
+        # crl.set_lastUpdate(_format_timestamp(validity_start).encode())
+        # crl.set_nextUpdate(_format_timestamp(validity_end).encode())
+
+        for cert, revoke_time in cert_revoke_list:
+            revoked = crypto.Revoked()
+            revoked.set_serial(hex(cert.serial_number)[2:].encode())
+            revoked.set_reason(None)  # can be one of revoked.all_reasons()
+            revoked.set_rev_date(_format_timestamp(revoke_time).encode())
+            crl.add_revoked(revoked)
+
+        # Replacement of crl.sign(). Ignore the export result.
+        crl.export(ca_cert.x509, ca_pkey.pkey, crypto.FILETYPE_PEM, validity_days, cls.default_digest.encode())
+        return CRL(crl)
+
+
+# TODO check all the encodings. Use the default, UTF-8 or something else like 'charmap', 'ascii'?

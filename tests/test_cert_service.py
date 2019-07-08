@@ -33,6 +33,11 @@ class TestCertService(unittest.TestCase):
             print(pkey)
             CertService.verify_cert_pkey(cert, pkey)
 
+    def test_load_crl(self):
+        print('=== CRL ===')
+        crl = CertService.load_crl_file(os.path.join(data_folder, 'openvpn-ca/keys/crl.pem'))
+        print(crl.dump_text())
+
     def test_build_ca(self):
         now = datetime.utcnow()
         valid_time = timedelta(days=3650)
@@ -123,3 +128,22 @@ class TestCertService(unittest.TestCase):
 
         CertService.verify_cert_pkey(cert, pkey)
         CertService.verify_cert_ca(cert, ca_cert)
+
+    def test_build_crl(self):
+        ca_cert = CertService.load_cert_file(os.path.join(data_folder, 'openvpn-ca/keys/ca.crt'))
+        ca_pkey = CertService.load_pkey_file(os.path.join(data_folder, 'openvpn-ca/keys/ca.key'))
+
+        now = datetime.utcnow()
+
+        crl = CertService.build_crl(
+            [
+                (CertService.load_cert_file(os.path.join(data_folder, 'openvpn-ca/keys/03.pem')), now),
+                (CertService.load_cert_file(os.path.join(data_folder, 'openvpn-ca/keys/07.pem')), now),
+                (CertService.load_cert_file(os.path.join(data_folder, 'openvpn-ca/keys/0D.pem')), now),
+            ],
+            ca_cert,
+            ca_pkey,
+            365
+        )
+
+        print(crl.dump_text())
