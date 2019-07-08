@@ -126,7 +126,28 @@ class CertService:
     default_digest = 'sha256'
 
     @staticmethod
-    def load_cert(cert_path: str) -> Cert:
+    def load_cert(cert_data: bytes) -> Cert:
+        if not cert_data:
+            raise CertServiceError('cert data must not be empty')
+        try:
+            x509 = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data)
+            return Cert(x509)
+        except crypto.Error as e:
+            raise CertServiceError('cert load failed', e.args[0])
+
+    @staticmethod
+    def load_pkey(pkey_data: bytes, passphrase=None) -> PrivateKey:
+        if not pkey_data:
+            raise CertServiceError('pkey data must not be empty')
+
+        try:
+            pkey = crypto.load_privatekey(crypto.FILETYPE_PEM, pkey_data, passphrase)
+            return PrivateKey(pkey)
+        except crypto.Error as e:
+            raise CertServiceError('pkey load failed', e.args[0])
+
+    @classmethod
+    def load_cert_file(cls, cert_path: str) -> Cert:
         if not cert_path:
             raise CertServiceError('cert path is required')
         if not os.path.exists(cert_path):
@@ -135,14 +156,10 @@ class CertService:
         with open(cert_path, 'rb') as f:
             buffer = f.read()
 
-        try:
-            x509 = crypto.load_certificate(crypto.FILETYPE_PEM, buffer)
-            return Cert(x509)
-        except crypto.Error as e:
-            raise CertServiceError('cert load failed', e.args[0])
+        return cls.load_cert(buffer)
 
-    @staticmethod
-    def load_pkey(pkey_path: str, passphrase=None) -> PrivateKey:
+    @classmethod
+    def load_pkey_file(cls, pkey_path: str, passphrase=None) -> PrivateKey:
         if not pkey_path:
             raise CertServiceError('pkey path is required')
         if not os.path.exists(pkey_path):
@@ -151,11 +168,7 @@ class CertService:
         with open(pkey_path, 'rb') as f:
             buffer = f.read()
 
-        try:
-            pkey = crypto.load_privatekey(crypto.FILETYPE_PEM, buffer, passphrase)
-            return PrivateKey(pkey)
-        except crypto.Error as e:
-            raise CertServiceError('pkey load failed', e.args[0])
+        return cls.load_pkey(buffer, passphrase)
 
     @staticmethod
     def verify_cert_ca(cert: Cert, ca_cert: Cert):

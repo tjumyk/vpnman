@@ -17,10 +17,10 @@ class TestConfigService(unittest.TestCase):
         print(cfg)
 
     def test_build_client_config(self):
-        ca_cert = CertService.load_cert(os.path.join(data_folder, 'openvpn-ca/keys/ca.crt'))
+        ca_cert = CertService.load_cert_file(os.path.join(data_folder, 'openvpn-ca/keys/ca.crt'))
 
-        cert = CertService.load_cert(os.path.join(data_folder, 'openvpn-ca/keys/ymiao.crt'))
-        pkey = CertService.load_pkey(os.path.join(data_folder, 'openvpn-ca/keys/ymiao.key'))
+        cert = CertService.load_cert_file(os.path.join(data_folder, 'openvpn-ca/keys/ymiao.crt'))
+        pkey = CertService.load_pkey_file(os.path.join(data_folder, 'openvpn-ca/keys/ymiao.key'))
         tls_path = os.path.join(data_folder, 'openvpn-ca/keys/ta.key')
 
         cfg = ConfigService.build_client_config(
