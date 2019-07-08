@@ -25,7 +25,7 @@ def _format_timestamp(time: datetime) -> str:
     return datetime.strftime(time, _timestamp_format)
 
 
-class CertServiceError(BasicError):
+class CertToolError(BasicError):
     pass
 
 
@@ -112,7 +112,7 @@ class CRL:
         return crypto.dump_crl(crypto.FILETYPE_TEXT, self._crl).decode()
 
 
-class BuildX509Params:
+class BuildCertParams:
     def __init__(self,
                  serial_number: int = None,
                  validity_start: datetime = None,
@@ -138,47 +138,47 @@ class BuildPKeyParams:
         self.key_length = key_length
 
 
-class CertService:
+class CertTool:
     default_digest = 'sha256'
 
     @staticmethod
     def load_cert(cert_data: bytes) -> Cert:
         if not cert_data:
-            raise CertServiceError('cert data must not be empty')
+            raise CertToolError('cert data must not be empty')
         try:
             x509 = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data)
             return Cert(x509)
         except crypto.Error as e:
-            raise CertServiceError('cert load failed', e.args[0])
+            raise CertToolError('cert load failed', e.args[0])
 
     @staticmethod
     def load_pkey(pkey_data: bytes, passphrase=None) -> PKey:
         if not pkey_data:
-            raise CertServiceError('pkey data must not be empty')
+            raise CertToolError('pkey data must not be empty')
 
         try:
             pkey = crypto.load_privatekey(crypto.FILETYPE_PEM, pkey_data, passphrase)
             return PKey(pkey)
         except crypto.Error as e:
-            raise CertServiceError('pkey load failed', e.args[0])
+            raise CertToolError('pkey load failed', e.args[0])
 
     @staticmethod
     def load_crl(crl_data: bytes) -> CRL:
         if not crl_data:
-            raise CertServiceError('crl data must not be empty')
+            raise CertToolError('crl data must not be empty')
 
         try:
             crl = crypto.load_crl(crypto.FILETYPE_PEM, crl_data)
             return CRL(crl)
         except crypto.Error as e:
-            raise CertServiceError('crl load failed', e.args[0])
+            raise CertToolError('crl load failed', e.args[0])
 
     @classmethod
     def load_cert_file(cls, cert_path: str) -> Cert:
         if not cert_path:
-            raise CertServiceError('cert path is required')
+            raise CertToolError('cert path is required')
         if not os.path.exists(cert_path):
-            raise CertServiceError('cert file does not exist')
+            raise CertToolError('cert file does not exist')
 
         with open(cert_path, 'rb') as f:
             buffer = f.read()
@@ -188,9 +188,9 @@ class CertService:
     @classmethod
     def load_pkey_file(cls, pkey_path: str, passphrase=None) -> PKey:
         if not pkey_path:
-            raise CertServiceError('pkey path is required')
+            raise CertToolError('pkey path is required')
         if not os.path.exists(pkey_path):
-            raise CertServiceError('pkey does not exist')
+            raise CertToolError('pkey does not exist')
 
         with open(pkey_path, 'rb') as f:
             buffer = f.read()
@@ -200,9 +200,9 @@ class CertService:
     @classmethod
     def load_crl_file(cls, crl_path: str) -> CRL:
         if not crl_path:
-            raise CertServiceError('crl path is required')
+            raise CertToolError('crl path is required')
         if not os.path.exists(crl_path):
-            raise CertServiceError('crl does not exist')
+            raise CertToolError('crl does not exist')
 
         with open(crl_path, 'rb') as f:
             buffer = f.read()
@@ -217,14 +217,14 @@ class CertService:
         try:
             store_ctx.verify_certificate()
         except crypto.X509StoreContextError as e:
-            raise CertServiceError('CA does not match', e.args[0])
+            raise CertToolError('CA does not match', e.args[0])
 
     @classmethod
     def verify_cert_pkey(cls, cert: Cert, pkey: PKey):
         if cert is None:
-            raise CertServiceError('cert is required')
+            raise CertToolError('cert is required')
         if pkey is None:
-            raise CertServiceError('pkey is required')
+            raise CertToolError('pkey is required')
 
         data = b'Test data for cert-pkey verification.'
         digest = cls.default_digest
@@ -233,7 +233,7 @@ class CertService:
             signature = crypto.sign(pkey.pkey, data, digest)
             crypto.verify(cert.x509, signature, data, digest)
         except crypto.Error as e:
-            raise CertServiceError('pkey does not match', e.args[0])
+            raise CertToolError('pkey does not match', e.args[0])
 
     @staticmethod
     def _build_pkey(params: BuildPKeyParams) -> crypto.PKey:
@@ -242,7 +242,7 @@ class CertService:
         return key
 
     @staticmethod
-    def _build_x509(params: BuildX509Params) -> crypto.X509:
+    def _build_cert(params: BuildCertParams) -> crypto.X509:
         cert = crypto.X509()
         cert.set_version(0x2)
         cert.set_serial_number(params.serial_number)
@@ -254,10 +254,10 @@ class CertService:
         return cert
 
     @classmethod
-    def build_ca(cls, pkey_params: BuildPKeyParams, x509_params: BuildX509Params) -> Tuple[PKey, Cert]:
+    def build_ca(cls, pkey_params: BuildPKeyParams, cert_params: BuildCertParams) -> Tuple[PKey, Cert]:
         key = cls._build_pkey(pkey_params)
-        cert = cls._build_x509(x509_params)
-        cert.set_pubkey(key) # key is a key pair
+        cert = cls._build_cert(cert_params)
+        cert.set_pubkey(key)  # key is a key pair
 
         # use self as issuer
         cert.set_issuer(cert.get_subject())
@@ -283,10 +283,10 @@ class CertService:
         return PKey(key), Cert(cert)
 
     @classmethod
-    def build_server(cls, pkey_params: BuildPKeyParams, x509_params: BuildX509Params,
+    def build_server(cls, pkey_params: BuildPKeyParams, cert_params: BuildCertParams,
                      ca_cert: Cert, ca_pkey: PKey) -> Tuple[PKey, Cert]:
         key = cls._build_pkey(pkey_params)
-        cert = cls._build_x509(x509_params)
+        cert = cls._build_cert(cert_params)
         cert.set_pubkey(key)  # key is a key pair
 
         # use CA as issuer
@@ -317,10 +317,10 @@ class CertService:
         return PKey(key), Cert(cert)
 
     @classmethod
-    def build_client(cls, pkey_params: BuildPKeyParams, x509_params: BuildX509Params,
+    def build_client(cls, pkey_params: BuildPKeyParams, cert_params: BuildCertParams,
                      ca_cert: Cert, ca_pkey: PKey) -> Tuple[PKey, Cert]:
         key = cls._build_pkey(pkey_params)
-        cert = cls._build_x509(x509_params)
+        cert = cls._build_cert(cert_params)
         cert.set_pubkey(key)  # key is a key pair
 
         # use CA as issuer
@@ -372,6 +372,5 @@ class CertService:
         # Replacement of crl.sign(). Ignore the export result.
         crl.export(ca_cert.x509, ca_pkey.pkey, crypto.FILETYPE_PEM, validity_days, cls.default_digest.encode())
         return CRL(crl)
-
 
 # TODO check all the encodings. Use the default, UTF-8 or something else like 'charmap', 'ascii'?

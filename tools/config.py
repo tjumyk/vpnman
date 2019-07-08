@@ -2,20 +2,20 @@ import os
 from typing import List
 
 from error import BasicError
-from services.cert import PKey, Cert
+from tools.cert import PKey, Cert
 
 
-class ConfigServiceError(BasicError):
+class ConfigToolError(BasicError):
     pass
 
 
-class ConfigService:
+class ConfigTool:
     @staticmethod
     def build_server_config(base_config_path: str, additional_lines: List[str] = None):
         if not base_config_path:
-            raise ConfigServiceError('base config path is required')
+            raise ConfigToolError('base config path is required')
         if not os.path.exists(base_config_path):
-            raise ConfigServiceError('base config does not exist')
+            raise ConfigToolError('base config does not exist')
 
         with open(base_config_path) as f:
             base_config = f.read()
@@ -29,19 +29,19 @@ class ConfigService:
     def build_client_config(base_config_path: str, ca_cert: Cert, client_cert: Cert, client_pkey: PKey,
                             tls_auth_key_path: str, additional_lines: List[str] = None):
         if not base_config_path:
-            raise ConfigServiceError('base config path is required')
+            raise ConfigToolError('base config path is required')
         if not os.path.exists(base_config_path):
-            raise ConfigServiceError('base config does not exist')
+            raise ConfigToolError('base config does not exist')
         if ca_cert is None:
-            raise ConfigServiceError('CA cert is required')
+            raise ConfigToolError('CA cert is required')
         if client_cert is None:
-            raise ConfigServiceError('client cert is required')
+            raise ConfigToolError('client cert is required')
         if client_pkey is None:
-            raise ConfigServiceError('client pkey is required')
+            raise ConfigToolError('client pkey is required')
         if not tls_auth_key_path:
-            raise ConfigServiceError('tls auth key path is required')
+            raise ConfigToolError('tls auth key path is required')
         if not os.path.exists(tls_auth_key_path):
-            raise ConfigServiceError('tls auth key does not exist')
+            raise ConfigToolError('tls auth key does not exist')
 
         with open(base_config_path) as f:
             base_config = f.read()
