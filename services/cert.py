@@ -218,7 +218,7 @@ class CertService:
     def build_ca(cls, pkey_params: BuildPKeyParams, x509_params: BuildX509Params) -> Tuple[PrivateKey, Cert]:
         key = cls._build_pkey(pkey_params)
         cert = cls._build_x509(x509_params)
-        cert.set_pubkey(key)
+        cert.set_pubkey(key) # key is a key pair
 
         # use self as issuer
         cert.set_issuer(cert.get_subject())
@@ -248,7 +248,7 @@ class CertService:
                      ca_cert: Cert, ca_pkey: PrivateKey) -> Tuple[PrivateKey, Cert]:
         key = cls._build_pkey(pkey_params)
         cert = cls._build_x509(x509_params)
-        cert.set_pubkey(key)
+        cert.set_pubkey(key)  # key is a key pair
 
         # use CA as issuer
         cert.set_issuer(ca_cert.x509.get_subject())
@@ -282,7 +282,7 @@ class CertService:
                      ca_cert: Cert, ca_pkey: PrivateKey) -> Tuple[PrivateKey, Cert]:
         key = cls._build_pkey(pkey_params)
         cert = cls._build_x509(x509_params)
-        cert.set_pubkey(key)
+        cert.set_pubkey(key)  # key is a key pair
 
         # use CA as issuer
         cert.set_issuer(ca_cert.x509.get_subject())
