@@ -44,14 +44,35 @@ class CredentialService:
         cred.is_revoked = True
         cred.revoked_at = datetime.utcnow()
 
+    @staticmethod
+    def _add(client: Client, cert_data: bytes, pkey_data: bytes, is_revoked: bool = False, revoked_at: datetime = None,
+             is_imported: bool = False) -> ClientCredential:
+        if client is None:
+            raise CredentialServiceError('client is required')
+        if not cert_data:
+            raise CredentialServiceError('cert data is required')
+        if not pkey_data:
+            raise CredentialServiceError('pkey data is required')
+
+        if is_revoked and revoked_at is None:
+            raise CredentialServiceError('revoked_at is required when cert is revoked')
+
+        # ensure each client has at most one active (non-revoked) credential
+        if not is_revoked and any(not cred.is_revoked for cred in client.credentials):
+            raise CredentialServiceError('client already has active credentials')
+
+        cred = ClientCredential(client_id=client.id, cert=cert_data, pkey=pkey_data,
+                                is_revoked=is_revoked, revoked_at=revoked_at, is_imported=is_imported)
+        db.session.add(cred)
+        return cred
+
     @classmethod
     def generate_for_client(cls, client: Client, ca_cert: Cert, ca_pkey: PKey) -> ClientCredential:
         if client is None:
             raise CredentialServiceError('client is required')
 
         # revoke all old credentials
-        old_credentials = client.credentials
-        for old_cred in old_credentials:
+        for old_cred in client.credentials:
             if not old_cred.is_revoked:
                 cls.revoke(old_cred)
 
@@ -73,24 +94,9 @@ class CredentialService:
             ca_cert, ca_pkey
         )
 
-        cred = ClientCredential(client_id=client.id, cert=cert.dump(), pkey=pkey.dump())
-        db.session.add(cred)
-        return cred
+        return cls._add(client, cert.dump(), pkey.dump())
 
-    @staticmethod
-    def import_for_client(client: Client, cert_data: bytes, pkey_data: bytes,
+    @classmethod
+    def import_for_client(cls, client: Client, cert_data: bytes, pkey_data: bytes,
                           is_revoked: bool = False, revoked_at: datetime = None) -> ClientCredential:
-        if client is None:
-            raise CredentialServiceError('client is required')
-        if not cert_data:
-            raise CredentialServiceError('cert data is required')
-        if not pkey_data:
-            raise CredentialServiceError('pkey data is required')
-
-        if is_revoked and revoked_at is None:
-            raise CredentialServiceError('revoked_at is required when cert is revoked')
-
-        cred = ClientCredential(client_id=client.id, cert=cert_data, pkey=pkey_data, is_imported=True,
-                                is_revoked=is_revoked, revoked_at=revoked_at)
-        db.session.add(cred)
-        return cred
+        return cls._add(client, cert_data, pkey_data, is_revoked, revoked_at, is_imported=True)

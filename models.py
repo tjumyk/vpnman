@@ -42,10 +42,10 @@ class ClientCredential(db.Model):
     cert = db.Column(db.Binary)
     pkey = db.Column(db.Binary)
 
-    is_imported = db.Column(db.Boolean, nullable=False, default=False)
-
     is_revoked = db.Column(db.Boolean, nullable=False, default=False)
     revoked_at = db.Column(db.DateTime)
+
+    is_imported = db.Column(db.Boolean, nullable=False, default=False)
 
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
@@ -55,8 +55,8 @@ class ClientCredential(db.Model):
         return '<ClientCredentials %r>' % self.id
 
     def to_dict(self, with_client: bool = False, with_cert: bool = True, with_pkey: bool = True) -> dict:
-        d = dict(id=self.id, client_id=self.client_id, is_imported=self.is_imported, is_revoked=self.is_revoked,
-                 revoked_at=self.revoked_at, created_at=self.created_at)
+        d = dict(id=self.id, client_id=self.client_id, is_revoked=self.is_revoked, revoked_at=self.revoked_at,
+                 is_imported=self.is_imported, created_at=self.created_at)
         if with_client:
             d['client'] = self.client.to_dict()
         if with_cert:
