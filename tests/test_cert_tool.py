@@ -4,6 +4,8 @@ import unittest
 import uuid
 from datetime import datetime, timedelta
 
+from flask import json
+
 from tools.cert import CertTool, BuildPKeyParams, BuildCertParams
 
 data_folder = '/home/kelvin/openvpn-certs'
@@ -37,6 +39,12 @@ class TestCertTool(unittest.TestCase):
         print('=== CRL ===')
         crl = CertTool.load_crl_file(os.path.join(data_folder, 'openvpn-ca/keys/crl.pem'))
         print(crl.dump_text())
+
+    def test_to_dict(self):
+        cert = CertTool.load_cert_file(os.path.join(data_folder, 'openvpn-ca/keys/ca.crt'))
+        print(json.dumps(cert.to_dict(), indent=2))
+        pkey = CertTool.load_pkey_file(os.path.join(data_folder, 'openvpn-ca/keys/ca.key'))
+        print(json.dumps(pkey.to_dict(), indent=2))
 
     def test_build_ca(self):
         now = datetime.utcnow()

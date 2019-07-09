@@ -16,6 +16,13 @@ from error import BasicError
 
 _timestamp_format = '%Y%m%d%H%M%SZ'
 
+_key_type_to_str = {
+    crypto.TYPE_DH: 'DH',
+    crypto.TYPE_DSA: 'DSA',
+    crypto.TYPE_EC: 'EC',
+    crypto.TYPE_RSA: 'RSA'
+}
+
 
 def _parse_timestamp(timestamp: str) -> datetime:
     return datetime.strptime(timestamp, _timestamp_format)
@@ -37,7 +44,7 @@ class Cert:
         return '<Cert "%s" [%d] %s [%s]-[%s]>' % \
                (self.common_name or 'Unknown',
                 self.serial_number,
-                self.algorithm,
+                self.signature_algorithm,
                 self.validity_start, self.validity_end)
 
     @property
@@ -45,11 +52,11 @@ class Cert:
         return self._x509
 
     @property
-    def key_length(self) -> int:
-        return self._x509.get_pubkey().bits()
+    def version(self) -> int:
+        return self._x509.get_version()
 
     @property
-    def algorithm(self) -> str:
+    def signature_algorithm(self) -> str:
         return self._x509.get_signature_algorithm().decode()
 
     @property
@@ -74,6 +81,31 @@ class Cert:
     def dump_text(self) -> str:
         return crypto.dump_certificate(crypto.FILETYPE_TEXT, self._x509).decode()
 
+    def to_dict(self) -> dict:
+        cert = self._x509
+        public_key = cert.get_pubkey()
+
+        ext_list = []
+        for i in range(cert.get_extension_count()):
+            ext = cert.get_extension(i)
+            ext_list.append(
+                dict(name=ext.get_short_name().decode(), is_critical=bool(ext.get_critical()), text=str(ext)))
+
+        return {
+            'version': self.version,
+            'subject': {k.decode(): v.decode() for k, v in cert.get_subject().get_components()},
+            'issuer': {k.decode(): v.decode() for k, v in cert.get_issuer().get_components()},
+            'serial_number': self.serial_number,
+            'validity_start': self.validity_start,
+            'validity_end': self.validity_end,
+            'signature_algorithm': self.signature_algorithm,
+            'extensions': ext_list,
+            'public_key': {
+                'type': _key_type_to_str[public_key.type()],
+                'length': public_key.bits()
+            }
+        }
+
 
 class PKey:
     def __init__(self, pkey: crypto.PKey):
@@ -95,6 +127,13 @@ class PKey:
 
     def dump_text(self) -> str:
         return crypto.dump_privatekey(crypto.FILETYPE_TEXT, self._pkey).decode()
+
+    def to_dict(self) -> dict:
+        pkey = self._pkey
+        return {
+            'type': _key_type_to_str[pkey.type()],
+            'length': pkey.bits()
+        }
 
 
 class CRL:
