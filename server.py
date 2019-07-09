@@ -14,7 +14,7 @@ with open('config.json') as _f_config:
 app.config.from_mapping(_config)
 
 db.init_app(app)
-CredentialService.init(_config.get('CLIENT_SERVICE'))
+CredentialService.init(_config.get('CREDENTIAL_SERVICE'))
 
 # import logging
 # logging.basicConfig()
