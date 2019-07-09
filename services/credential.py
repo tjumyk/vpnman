@@ -45,6 +45,20 @@ class CredentialService:
         cred.revoked_at = datetime.utcnow()
 
     @staticmethod
+    def unrevoke(cred: ClientCredential):
+        if cred is None:
+            raise CredentialServiceError('credential is required')
+
+        if not cred.is_revoked:
+            raise CredentialServiceError('credential is not revoked')
+
+        if any(not cred.is_revoked for cred in cred.client.credentials):
+            raise CredentialServiceError('client already has active credentials')
+
+        cred.is_revoked = False
+        cred.revoked_at = None
+
+    @staticmethod
     def _add(client: Client, cert_data: bytes, pkey_data: bytes, is_revoked: bool = False, revoked_at: datetime = None,
              is_imported: bool = False) -> ClientCredential:
         if client is None:
