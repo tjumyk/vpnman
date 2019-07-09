@@ -1,2 +1,6 @@
 .idea/
 *.iml
+
+static/
+config.json
+oauth.config.json

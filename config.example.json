@@ -1,0 +1,21 @@
+{
+  "SECRET_KEY": "secRETsecRET",
+  "SQLALCHEMY_DATABASE_URI": "postgresql://user:PASS@localhost:5432/vpnman",
+  "SQLALCHEMY_TRACK_MODIFICATIONS": false,
+
+  "SESSION_COOKIE_NAME": "vpnman_session",
+
+  "CLIENT_SERVICE": {
+    "cert_valid_days": 3650,
+    "cert_subject_default_fields": {
+      "countryName": "AU",
+      "stateOrProvinceName": "NSW",
+      "localityName": "Sydney",
+      "organizationName": "UNSW",
+      "organizationalUnitName": "Knowledge Graph Group",
+      "commonName": "client",
+      "emailAddress": "client@kg.unsw.edu.au",
+      "name": "server"
+    }
+  }
+}
