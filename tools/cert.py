@@ -75,8 +75,8 @@ class Cert:
     def serial_number(self) -> int:
         return self._x509.get_serial_number()
 
-    def dump(self) -> str:
-        return crypto.dump_certificate(crypto.FILETYPE_PEM, self._x509).decode()
+    def dump(self) -> bytes:
+        return crypto.dump_certificate(crypto.FILETYPE_PEM, self._x509)
 
     def dump_text(self) -> str:
         return crypto.dump_certificate(crypto.FILETYPE_TEXT, self._x509).decode()
@@ -122,8 +122,8 @@ class PKey:
     def key_length(self) -> int:
         return self._pkey.bits()
 
-    def dump(self) -> str:
-        return crypto.dump_privatekey(crypto.FILETYPE_PEM, self._pkey).decode()
+    def dump(self) -> bytes:
+        return crypto.dump_privatekey(crypto.FILETYPE_PEM, self._pkey)
 
     def dump_text(self) -> str:
         return crypto.dump_privatekey(crypto.FILETYPE_TEXT, self._pkey).decode()

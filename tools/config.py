@@ -54,9 +54,9 @@ class ConfigTool:
             full_config = '%s\n%s' % (full_config, '\n'.join(additional_lines))
         full_config = '%s\n<ca>\n%s</ca>\n<cert>\n%s</cert>\n<key>\n%s</key>\n<tls-auth>\n%s</tls-auth>\n' % (
             full_config,
-            ca_cert.dump(),
-            client_cert.dump(),
-            client_pkey.dump(),
+            ca_cert.dump().decode(),
+            client_cert.dump().decode(),
+            client_pkey.dump().decode(),
             tls_auth_key
         )
         return full_config
