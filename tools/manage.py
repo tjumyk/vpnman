@@ -181,7 +181,7 @@ class ManagementSession:
                 elif header == 'GLOBAL_STATS':
                     results['global_stats'] = params  # param syntax is not clear
                 else:
-                    # realtime defined tables
+                    # tables defined at realtime
                     table_def = None
                     for k, v in table_defs.items():
                         if k == header:
