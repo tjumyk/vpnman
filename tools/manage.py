@@ -104,7 +104,7 @@ class ManagementSession:
         # This should be executed before any other RECV because the welcome info is the first realtime message received
         # passively after the connection is established.
         welcome = self._recv(ignore_realtime_messages=False)
-        match = re.search(r'management interface version ([^\s]+)', welcome, re.IGNORECASE)
+        match = re.search(r'management interface version (\S+)', welcome, re.IGNORECASE)
         if not match or match.group(1) not in self._supported_management_interface_versions:
             self.exit()  # exit first
             raise ManagementToolError('Unsupported management interface version')
