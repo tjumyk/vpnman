@@ -230,6 +230,22 @@ class ManagementSession:
                     table.append(row)
             return results
 
+    def load_stats(self) -> dict:
+        with self._cmd_lock:
+            self._send('load-stats')
+            data = self._recv()
+
+            results = {}
+            msg = data.split(':', 1)[1].strip()
+            for column in msg.split(','):
+                k, v = column.split('=', 1)
+                try:
+                    v = int(v)
+                except (TypeError, ValueError):
+                    pass
+                results[k] = v
+            return results
+
 
 class ManagementTool:
     _server_host = 'localhost'

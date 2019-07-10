@@ -38,3 +38,6 @@ class TestManagementTool(TestCase):
 
     def test_status(self):
         print(dump(self.session.status()))
+
+    def test_load_stats(self):
+        print(dump(self.session.load_stats()))
