@@ -52,7 +52,7 @@ class ManagementSession:
             raise ManagementToolError('session has been closed')
 
         ord_newline = ord('\n')  # index of newline character for byte comparison
-        realtime_header = re.compile(r'>[\w\-]+:')
+        realtime_header = re.compile(r'^>[\w\-]+:')
         success_header = 'SUCCESS:'
         error_header = 'ERROR:'
 
