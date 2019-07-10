@@ -12,13 +12,13 @@ class CredentialServiceError(BasicError):
 
 
 class CredentialService:
-    cert_valid_days = 365
-    cert_subject_default_fields = {}
+    _cert_valid_days = 365
+    _cert_subject_default_fields = {}
 
     @classmethod
     def init(cls, config: dict):
-        cls.cert_valid_days = config.get('cert_valid_days', cls.cert_valid_days)
-        cls.cert_subject_default_fields = config.get('cert_subject_default_fields', cls.cert_subject_default_fields)
+        cls._cert_valid_days = config.get('cert_valid_days', cls._cert_valid_days)
+        cls._cert_subject_default_fields = config.get('cert_subject_default_fields', cls._cert_subject_default_fields)
 
     @staticmethod
     def get(_id: int) -> Optional[ClientCredential]:
@@ -78,7 +78,7 @@ class CredentialService:
 
         # generate pkey and cert
         now = datetime.utcnow()
-        subject = dict(cls.cert_subject_default_fields)  # make a copy first
+        subject = dict(cls._cert_subject_default_fields)  # make a copy first
         subject['commonName'] = client.name
         if client.email:
             subject['emailAddress'] = client.email
@@ -88,7 +88,7 @@ class CredentialService:
             BuildCertParams(
                 uuid.uuid4().int,
                 now,
-                now + timedelta(days=cls.cert_valid_days),
+                now + timedelta(days=cls._cert_valid_days),
                 subject
             ),
             ca_cert, ca_pkey
