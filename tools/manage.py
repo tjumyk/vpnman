@@ -151,8 +151,11 @@ class ManagementSession:
 
     def state(self, history=None) -> List[dict]:
         with self._cmd_lock:
-            if history:
-                cmd = 'state %s' % history
+            if history is not None:
+                if (type(history) is int and history > 0) or history == 'all':
+                    cmd = 'state %s' % history
+                else:
+                    raise ManagementToolError('invalid state param')
             else:
                 cmd = 'state'  # current state only
             self._send(cmd)
