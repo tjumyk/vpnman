@@ -5,7 +5,7 @@
 
   "SESSION_COOKIE_NAME": "vpnman_session",
 
-  "CLIENT_SERVICE": {
+  "CREDENTIAL_SERVICE": {
     "cert_valid_days": 3650,
     "cert_subject_default_fields": {
       "countryName": "AU",
