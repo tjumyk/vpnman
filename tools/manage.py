@@ -13,7 +13,7 @@ class ManagementToolError(BasicError):
 
 
 class ManagementSession:
-    _supported_management_interface_versions = ['1']
+    _supported_management_interface_versions = {'1'}
 
     def __init__(self, _socket: socket.socket, buffer_size: int):
         self._socket = _socket
@@ -57,8 +57,6 @@ class ManagementSession:
               ignore_realtime_messages: bool = True) -> str:
         if self._is_closed:
             raise ManagementToolError('session has been closed')
-        # if not multilines_termination:
-        #     raise ManagementToolError('multilines termination must not be empty')
 
         ord_newline = ord('\n')  # index of newline character for byte comparison
 
