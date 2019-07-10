@@ -1,7 +1,6 @@
 import logging
 import re
 import socket
-from datetime import datetime
 from threading import Lock
 from typing import List
 
@@ -224,14 +223,13 @@ class ManagementSession:
                             v = None
                         row[k] = v
 
-                    # merge the dual-format (str+int) time columns into a single column with datetime type
+                    # merge the dual-format (str+int) time columns into a single int column
                     merge_time_columns = []
                     for k, v in row.items():
                         if k.endswith(time_t_suffix):
                             short_key = k[:-len(time_t_suffix)]
                             if short_key in row:
-                                _time = datetime.utcfromtimestamp(int(v))
-                                merge_time_columns.append((short_key, k, _time))
+                                merge_time_columns.append((short_key, k, int(v)))
                     for short_key, key, value in merge_time_columns:
                         row[short_key] = value
                         del row[key]
