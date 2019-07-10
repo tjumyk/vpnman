@@ -5,6 +5,10 @@ from flask import json
 from tools.manage import ManagementTool, ManagementSession
 
 
+def dump(data):
+    return json.dumps(data, indent=2, sort_keys=False)
+
+
 class TestManagementTool(TestCase):
     session: ManagementSession
 
@@ -18,7 +22,7 @@ class TestManagementTool(TestCase):
             cls.session.exit()
 
     def test_version(self):
-        print(json.dumps(self.session.version(), indent=2, sort_keys=False))
+        print(dump(self.session.version()))
 
     def test_state(self):
         print('=== state ===')
@@ -33,4 +37,4 @@ class TestManagementTool(TestCase):
             print(state)
 
     def test_status(self):
-        print(json.dumps(self.session.status(), indent=2, sort_keys=False))
+        print(dump(self.session.status()))
