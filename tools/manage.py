@@ -242,5 +242,7 @@ class ManagementTool:
             return ManagementSession(_socket, cls._socket_buffer_size)
         except socket.timeout as e:
             raise ManagementToolError('socket timeout', str(e))
-        except (socket.error, socket.herror, socket.gaierror) as e:
+        except (socket.herror, socket.gaierror) as e:
+            raise ManagementToolError('socket address error', str(e))
+        except socket.error as e:
             raise ManagementToolError('socket error', str(e))
