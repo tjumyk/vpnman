@@ -41,3 +41,12 @@ class TestManagementTool(TestCase):
 
     def test_load_stats(self):
         print(dump(self.session.load_stats()))
+
+    def test_log(self):
+        print('=== log 5 ===')
+        for log in self.session.log(5):
+            print(log)
+
+        print('=== log all ===')
+        for log in self.session.log('all'):
+            print(log)

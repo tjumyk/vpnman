@@ -47,7 +47,8 @@ class ManagementSession:
 
     def _recv(self, multilines: bool = False, multilines_termination: str = 'END',
               ignore_realtime_messages: bool = True, raise_on_error: bool = True,
-              auto_remove_success_header: bool = True) -> str:
+              auto_remove_success_header: bool = True,
+              decode_encoding: str = 'utf-8', decode_errors: str = 'strict') -> str:
         if self._is_closed:
             raise ManagementToolError('session has been closed')
 
@@ -70,7 +71,7 @@ class ManagementSession:
 
             stop_receiving = False
             for line in lines_buffer.splitlines():
-                line = line.decode()
+                line = line.decode(decode_encoding, decode_errors)
                 is_realtime = bool(realtime_header.match(line))
                 is_error = line.startswith(error_header)
 
@@ -253,6 +254,27 @@ class ManagementSession:
                 except (TypeError, ValueError):
                     pass
                 results[k] = v
+            return results
+
+    def log(self, history=10) -> List[dict]:
+        with self._cmd_lock:
+            if (type(history) is int and history > 0) or history == 'all':
+                cmd = 'log %s' % history
+            else:
+                raise ManagementToolError('invalid log param')
+
+            self._send(cmd)
+            # use 'replace' error handler for decoding in case there are some special characters in log
+            data = self._recv(multilines=True, decode_errors='replace')
+
+            results = []
+            for line in data.splitlines():
+                parts = line.split(',', 2)
+                results.append({
+                    'time': int(parts[0]),
+                    'flags': parts[1],
+                    'message': parts[2]
+                })
             return results
 
 
