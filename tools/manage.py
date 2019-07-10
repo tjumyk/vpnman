@@ -1,6 +1,7 @@
 import logging
 import re
 import socket
+from threading import Lock
 from typing import List
 
 from error import BasicError
@@ -21,21 +22,11 @@ class ManagementSession:
 
         # use a flag to track if the socket has been closed
         self._is_closed = False
+        # use a lock to avoid two commands executing at the same time
+        self._cmd_lock = Lock()
 
-        # receive the welcome info message from the server and check the version
-        welcome = self._recv(ignore_realtime_messages=False)
-        match = re.search(r'management interface version ([^\s]+)', welcome, re.IGNORECASE)
-        if not match or match.group(1) not in self._supported_management_interface_versions:
-            self.exit()  # exit first
-            raise ManagementToolError('Unsupported management interface version')
-
-    def exit(self):
-        if self._is_closed:  # if call exit() after session is closed, simply ignore it
-            return
-        self._send('exit')
-        self._socket.shutdown(socket.SHUT_RDWR)
-        self._socket.close()
-        self._is_closed = True
+        # verify welcome message
+        self._verify_welcome()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.exit()
@@ -100,102 +91,135 @@ class ManagementSession:
             lines.append('')
         return '\n'.join(lines)
 
+    def _verify_welcome(self):
+        # Receive the welcome info message from the server and check if the version is supported.
+        # This should be executed before any other RECV because the welcome info is the first realtime message received
+        # passively after the connection is established.
+        welcome = self._recv(ignore_realtime_messages=False)
+        match = re.search(r'management interface version ([^\s]+)', welcome, re.IGNORECASE)
+        if not match or match.group(1) not in self._supported_management_interface_versions:
+            self.exit()  # exit first
+            raise ManagementToolError('Unsupported management interface version')
+
+    def exit(self):
+        with self._cmd_lock:
+            if self._is_closed:  # if call exit() after session is closed, simply ignore it
+                return
+            try:
+                self._send('exit')
+            except (socket.timeout, socket.error) as e:
+                logger.warning('send exit failed', exc_info=e)
+            finally:
+                # no matter if 'exit' was sent successfully or not, try to close the socket
+                try:
+                    self._socket.shutdown(socket.SHUT_RDWR)
+                    self._socket.close()
+                except (socket.timeout, socket.error) as e:
+                    logger.warning('send close failed', exc_info=e)
+                finally:
+                    # always release the reference. GC will also close the socket if it was not closed successfully.
+                    self._socket = None
+                self._is_closed = True  # mark session as closed in any case
+
     def version(self) -> dict:
-        self._send('version')
-        result = {}
-        for line in self._recv(multilines=True).splitlines():
-            k, v = line.split(':', 1)
-            k, v = k.strip(), v.strip()
-            if k == 'OpenVPN Version':
-                result['openvpn'] = v
-            elif k == 'Management Version':
-                result['management'] = v
-        return result
+        with self._cmd_lock:
+            self._send('version')
+            result = {}
+            for line in self._recv(multilines=True).splitlines():
+                k, v = line.split(':', 1)
+                k, v = k.strip(), v.strip()
+                if k == 'OpenVPN Version':
+                    result['openvpn'] = v
+                elif k == 'Management Version':
+                    result['management'] = v
+            return result
 
     def state(self, history=None) -> List[dict]:
-        if history:
-            cmd = 'state %s' % history
-        else:
-            cmd = 'state'  # current state only
-        self._send(cmd)
+        with self._cmd_lock:
+            if history:
+                cmd = 'state %s' % history
+            else:
+                cmd = 'state'  # current state only
+            self._send(cmd)
 
-        results = []
-        for line in self._recv(multilines=True).splitlines():
-            parts = line.split(',')
-            results.append({
-                'time': int(parts[0]),
-                'state': parts[1],
-                'description': parts[2],
-                'local_ip': parts[3],
-                'remote_ip': parts[4]
-            })
-        return results
+            results = []
+            for line in self._recv(multilines=True).splitlines():
+                parts = line.split(',')
+                results.append({
+                    'time': int(parts[0]),
+                    'state': parts[1],
+                    'description': parts[2],
+                    'local_ip': parts[3],
+                    'remote_ip': parts[4]
+                })
+            return results
 
     def status(self):
-        self._send('status 3')  # use version 3 format
-        data = self._recv(multilines=True)
+        with self._cmd_lock:
+            self._send('status 3')  # use version 3 format
+            data = self._recv(multilines=True)
 
-        int_column_names = {'Bytes Received', 'Bytes Sent', 'Client ID', 'Peer ID'}
-        undef_to_null_column_names = {'Username'}
-        time_t_suffix = ' (time_t)'
+            int_column_names = {'Bytes Received', 'Bytes Sent', 'Client ID', 'Peer ID'}
+            undef_to_null_column_names = {'Username'}
+            time_t_suffix = ' (time_t)'
 
-        results = {}
-        table_defs = {}
-        for line in data.splitlines():
-            parts = line.split('\t')
-            header = parts[0]
-            params = parts[1:]
+            results = {}
+            table_defs = {}
+            for line in data.splitlines():
+                parts = line.split('\t')
+                header = parts[0]
+                params = parts[1:]
 
-            if header == 'TITLE':
-                continue  # openvpn version string, ignored
-            if header == 'TIME':
-                continue  # current time, ignored
+                if header == 'TITLE':
+                    continue  # openvpn version string, ignored
+                if header == 'TIME':
+                    continue  # current time, ignored
 
-            if header == 'HEADER':
-                table_defs[params[0]] = params[1:]
-            elif header == 'GLOBAL_STATS':
-                results['global_stats'] = params  # param syntax is not clear
-            else:
-                # realtime defined tables
-                table_def = None
-                for k, v in table_defs.items():
-                    if k == header:
-                        table_def = v
-                        break
-                if table_def is None:
-                    logger.warning('unknown header: %s', header)
+                if header == 'HEADER':
+                    table_defs[params[0]] = params[1:]
+                elif header == 'GLOBAL_STATS':
+                    results['global_stats'] = params  # param syntax is not clear
+                else:
+                    # realtime defined tables
+                    table_def = None
+                    for k, v in table_defs.items():
+                        if k == header:
+                            table_def = v
+                            break
+                    if table_def is None:
+                        logger.warning('unknown header: %s', header)
 
-                # put row data into table.
-                # int conversion is applied in some columns.
-                # 'UNDEF' is replaced with None in some columns.
-                table_key_lower = header.lower()
-                table = results.get(table_key_lower)
-                if table is None:
-                    table = []
-                    results[table_key_lower] = table
-                row = {}
-                for k, v in zip(table_def, params):
-                    if k in int_column_names:
-                        v = int(v)
-                    if k in undef_to_null_column_names and v == 'UNDEF':
-                        v = None
-                    row[k] = v
+                    # put row data into table.
+                    # int conversion is applied in some columns.
+                    # 'UNDEF' is replaced with None in some columns.
+                    table_key_lower = header.lower()
+                    table = results.get(table_key_lower)
+                    if table is None:
+                        table = []
+                        results[table_key_lower] = table
+                    row = {}
+                    for k, v in zip(table_def, params):
+                        if k in int_column_names:
+                            v = int(v)
+                        if k in undef_to_null_column_names and v == 'UNDEF':
+                            v = None
+                        row[k] = v
 
-                # merge dual-format time columns into a single column
-                merge_time_columns = []
-                for k, v in row.items():
-                    if k.endswith(time_t_suffix):
-                        short_key = k[:-len(time_t_suffix)]
-                        if short_key in row:
-                            merge_time_columns.append((short_key, k, int(v)))
-                for short_key, key, value in merge_time_columns:
-                    row[short_key] = value
-                    del row[key]
+                    # merge dual-format time columns into a single column
+                    merge_time_columns = []
+                    for k, v in row.items():
+                        if k.endswith(time_t_suffix):
+                            short_key = k[:-len(time_t_suffix)]
+                            if short_key in row:
+                                merge_time_columns.append((short_key, k, int(v)))
+                    for short_key, key, value in merge_time_columns:
+                        row[short_key] = value
+                        del row[key]
 
-                # convert column names to python style
-                row = {k.replace(' ', '_').lower(): v for k, v in row.items()}
-                table.append(row)
-        return results
+                    # convert column names to python style
+                    row = {k.replace(' ', '_').lower(): v for k, v in row.items()}
+                    table.append(row)
+            return results
 
 
 class ManagementTool:
