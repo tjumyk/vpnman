@@ -70,6 +70,13 @@ class ManagementSession:
             for line in lines_buffer.splitlines():
                 line = line.decode()
                 is_realtime = bool(realtime_header.match(line))
+                is_error = line.startswith(error_header)
+
+                if is_error:
+                    stop_receiving = True  # no matter if it's in multilines mode or not
+                    if raise_on_error:
+                        error = line[len(error_header):].lstrip()  # remove the extra leading whitespace
+                        raise ManagementToolError('error received', error)
 
                 if multilines:
                     if line == multilines_termination:
@@ -85,12 +92,6 @@ class ManagementSession:
             lines_buffer = b''  # reset lines buffer
             if stop_receiving:
                 break
-
-        if raise_on_error:
-            for line in lines:
-                if line.startswith(error_header):
-                    error = line[len(error_header):].lstrip()
-                    raise ManagementToolError('error received', error)
 
         # if there is at least one line, add a empty string to the list to enforce a trailing newline in the final
         # joined output
