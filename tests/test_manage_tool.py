@@ -18,7 +18,7 @@ class TestManagementTool(TestCase):
             cls.session.exit()
 
     def test_version(self):
-        print(self.session.version())
+        print(json.dumps(self.session.version(), indent=2, sort_keys=False))
 
     def test_state(self):
         print('=== state ===')
@@ -33,4 +33,4 @@ class TestManagementTool(TestCase):
             print(state)
 
     def test_status(self):
-        print(json.dumps(self.session.status(), indent=2))
+        print(json.dumps(self.session.status(), indent=2, sort_keys=False))
