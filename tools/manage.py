@@ -46,7 +46,7 @@ class ManagementSession:
         self._socket.sendall(data_bytes)
 
     def _recv(self, multilines: bool = False, multilines_termination: str = 'END',
-              ignore_realtime_messages: bool = True) -> str:
+              ignore_realtime_messages: bool = True, raise_on_error: bool = True) -> str:
         if self._is_closed:
             raise ManagementToolError('session has been closed')
 
@@ -85,6 +85,13 @@ class ManagementSession:
             lines_buffer = b''  # reset lines buffer
             if stop_receiving:
                 break
+
+        if raise_on_error:
+            error_header = 'ERROR:'
+            for line in lines:
+                if line.startswith(error_header):
+                    error = line[len(error_header):].lstrip()
+                    raise ManagementToolError('error received', error)
 
         # if there is at least one line, add a empty string to the list to enforce a trailing newline in the final
         # joined output
