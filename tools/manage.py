@@ -162,7 +162,7 @@ class ManagementSession:
                 })
             return results
 
-    def status(self):
+    def status(self) -> dict:
         with self._cmd_lock:
             self._send('status 3')  # use version 3 format
             data = self._recv(multilines=True)
