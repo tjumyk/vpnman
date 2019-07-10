@@ -51,6 +51,8 @@ class ManagementSession:
             raise ManagementToolError('session has been closed')
 
         ord_newline = ord('\n')  # index of newline character for byte comparison
+        realtime_header = re.compile(r'>[\w\-]+:')
+        error_header = 'ERROR:'
 
         # keep receiving data until we have enough lines in 'lines'
         lines = []
@@ -67,9 +69,7 @@ class ManagementSession:
             stop_receiving = False
             for line in lines_buffer.splitlines():
                 line = line.decode()
-                # Real-time messages start with a '>' character in the first column and are immediately followed by a
-                # type keyword
-                is_realtime = line[0] == '>' and line[1].isalpha()
+                is_realtime = bool(realtime_header.match(line))
 
                 if multilines:
                     if line == multilines_termination:
@@ -87,7 +87,6 @@ class ManagementSession:
                 break
 
         if raise_on_error:
-            error_header = 'ERROR:'
             for line in lines:
                 if line.startswith(error_header):
                     error = line[len(error_header):].lstrip()
