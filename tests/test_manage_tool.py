@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from flask import json
+import json
 
 from tools.manage import ManagementTool, ManagementSession
 
