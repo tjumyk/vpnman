@@ -46,12 +46,14 @@ class ManagementSession:
         self._socket.sendall(data_bytes)
 
     def _recv(self, multilines: bool = False, multilines_termination: str = 'END',
-              ignore_realtime_messages: bool = True, raise_on_error: bool = True) -> str:
+              ignore_realtime_messages: bool = True, raise_on_error: bool = True,
+              auto_remove_success_header: bool = True) -> str:
         if self._is_closed:
             raise ManagementToolError('session has been closed')
 
         ord_newline = ord('\n')  # index of newline character for byte comparison
         realtime_header = re.compile(r'>[\w\-]+:')
+        success_header = 'SUCCESS:'
         error_header = 'ERROR:'
 
         # keep receiving data until we have enough lines in 'lines'
@@ -87,6 +89,11 @@ class ManagementSession:
                             lines.append(line)
                 else:
                     if not is_realtime or not ignore_realtime_messages:
+                        # auto_remove_success_header is only applicable to single-line mode
+                        if auto_remove_success_header and line.startswith(success_header):
+                            # NOTICE: you are MUTATING the content of this line! Make sure this doesn't break logic in
+                            # other places
+                            line = line[len(success_header):].lstrip()  # remove the extra leading whitespace
                         lines.append(line)
                         stop_receiving = True
             lines_buffer = b''  # reset lines buffer
@@ -236,8 +243,7 @@ class ManagementSession:
             data = self._recv()
 
             results = {}
-            msg = data.split(':', 1)[1].strip()
-            for column in msg.split(','):
+            for column in data.split(','):
                 k, v = column.split('=', 1)
                 try:
                     v = int(v)
