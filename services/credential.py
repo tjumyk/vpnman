@@ -1,3 +1,4 @@
+import os
 import uuid
 from datetime import datetime, timedelta
 from typing import Optional, List
@@ -120,26 +121,30 @@ class CredentialService:
         return cls._add(client, cert.dump(), pkey.dump())
 
     @classmethod
-    def import_for_client(cls, client: Client, cert_data: bytes, pkey_data: bytes,
+    def import_for_client(cls, client: Client, cert_path: str, pkey_path: str,
                           is_revoked: bool = False, revoked_at: datetime = None,
                           check_common_name: bool = True) -> ClientCredential:
         if client is None:
             raise CredentialServiceError('client is required')
-        if not cert_data:
-            raise CredentialServiceError('cert data is required')
-        if not pkey_data:
-            raise CredentialServiceError('pkey data is required')
+        if not cert_path:
+            raise CredentialServiceError('cert path is required')
+        if not pkey_path:
+            raise CredentialServiceError('pkey path is required')
+        if not os.path.exists(cert_path):
+            raise CredentialServiceError('cert file does not exist')
+        if not os.path.exists(pkey_path):
+            raise CredentialServiceError('pkey file does not exist')
 
         if not is_revoked and any(not cred.is_revoked for cred in client.credentials):
             raise CredentialServiceError('client already has active credentials')
 
         # load cert
-        cert = CertTool.load_cert(cert_data)
+        cert = CertTool.load_cert_file(cert_path)
         if check_common_name and cert.common_name != client.name:
             raise CredentialServiceError('cert common name does not match client name')
 
         # load pkey
-        pkey = CertTool.load_pkey(pkey_data)
+        pkey = CertTool.load_pkey_file(pkey_path)
 
         # verify cert and pkey
         CertTool.verify_cert_pkey(cert, pkey)
@@ -149,7 +154,10 @@ class CredentialService:
 
         # verify cert against ca
         CertTool.verify_cert_ca(cert, ca_cert)
-        return cls._add(client, cert_data, pkey_data, is_revoked, revoked_at, is_imported=True)
+
+        # Dumped data is stored. For certificates, the dumped data is not necessarily the same as the content in the
+        # original files. Check the unit test for more details.
+        return cls._add(client, cert.dump(), pkey.dump(), is_revoked, revoked_at, is_imported=True)
 
     @classmethod
     def update_crl(cls):

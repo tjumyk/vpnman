@@ -158,14 +158,9 @@ def import_credential(client_name: str, cert_file: str, pkey_file: str, revoked_
         print('client not found')
         exit(1)
 
-    with open(cert_file, 'rb') as f_cert:
-        cert_data = f_cert.read()
-    with open(pkey_file, 'rb') as f_pkey:
-        pkey_data = f_pkey.read()
-
     is_revoked = revoked_at is not None
     cred = CredentialService.import_for_client(
-        client, cert_data, pkey_data,
+        client, cert_file, pkey_file,
         is_revoked=is_revoked, revoked_at=revoked_at,
         check_common_name=check_common_name
     )
