@@ -120,6 +120,13 @@ class CredentialService:
     def import_for_client(cls, client: Client, cert_data: bytes, pkey_data: bytes,
                           is_revoked: bool = False, revoked_at: datetime = None,
                           check_common_name: bool = True) -> ClientCredential:
+        if client is None:
+            raise CredentialServiceError('client is required')
+        if not cert_data:
+            raise CredentialServiceError('cert data is required')
+        if not pkey_data:
+            raise CredentialServiceError('pkey data is required')
+
         # load cert
         cert = CertTool.load_cert(cert_data)
         if check_common_name and cert.common_name != client.name:
