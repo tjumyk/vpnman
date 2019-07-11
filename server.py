@@ -79,12 +79,41 @@ def api_my_client():
         return jsonify(msg=e.msg, detail=e.detail), 500
 
 
+@app.route('/api/my-client/details')
+@oauth.requires_login
+def api_my_client_details():
+    try:
+        user = oauth.get_user()
+        client = ClientService.get_by_user_id(user.id)
+        if client is None:
+            return jsonify(msg='client not found'), 500
+
+        return jsonify(client.to_dict(with_active_credential=False, with_all_credentials=True,
+                                      with_credential_details=True))
+    except (oauth.OAuthError, ClientServiceError) as e:
+        return jsonify(msg=e.msg, detail=e.detail), 500
+
+
 @app.route('/api/clients')
 @oauth.requires_admin
 def api_all_clients():
     try:
         clients = ClientService.get_all()
         return jsonify([client.to_dict() for client in clients])
+    except ClientServiceError as e:
+        return jsonify(msg=e.msg, detail=e.detail), 500
+
+
+@app.route('/api/clients/<int:cid>')
+@oauth.requires_admin
+def api_client_detail(cid: int):
+    try:
+        client = ClientService.get(cid)
+        if client is None:
+            return jsonify(msg='client not found'), 400
+
+        return jsonify(client.to_dict(with_active_credential=False, with_all_credentials=True,
+                                      with_credential_details=True))
     except ClientServiceError as e:
         return jsonify(msg=e.msg, detail=e.detail), 500
 
