@@ -1,9 +1,8 @@
-import json
 import os
 from datetime import datetime
 
 import click
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, json
 
 from auth_connect import oauth
 from models import db
@@ -101,12 +100,13 @@ def drop_db():
 
 
 @app.cli.command()
-@click.argument('client_id', type=int)
+@click.argument('client_name')
 @click.argument('cert_file')
 @click.argument('pkey_file')
 @click.option('-r', '--revoked-at', type=click.DateTime())
-def import_credential(client_id: int, cert_file: str, pkey_file: str, revoked_at: datetime):
-    client = ClientService.get(client_id)
+@click.option('-c/-C', '--check-common-name/-no-check-common-name', default=True)
+def import_credential(client_name: str, cert_file: str, pkey_file: str, revoked_at: datetime, check_common_name: bool):
+    client = ClientService.get_by_name(client_name)
     if client is None:
         print('client not found')
         exit(1)
@@ -116,9 +116,23 @@ def import_credential(client_id: int, cert_file: str, pkey_file: str, revoked_at
     with open(pkey_file, 'rb') as f_pkey:
         pkey_data = f_pkey.read()
 
-    CredentialService.import_for_client(client, cert_data, pkey_data,
-                                        is_revoked=revoked_at is not None, revoked_at=revoked_at)
+    cred = CredentialService.import_for_client(
+        client, cert_data, pkey_data,
+        is_revoked=revoked_at is not None, revoked_at=revoked_at,
+        check_common_name=check_common_name
+    )
     db.session.commit()
+    print(json.dumps(cred.to_dict(with_client=False, with_cert=False, with_pkey=False), indent=2))
+
+
+@app.cli.command()
+@click.argument('user_id', type=int)
+@click.argument('name')
+@click.option('-e', '--email')
+def import_client(user_id: int, name: str, email: str):
+    client = ClientService.add(user_id, name, email)
+    db.session.commit()
+    print(json.dumps(client.to_dict(with_active_credential=False, with_all_credentials=False), indent=2))
 
 
 if __name__ == '__main__':
