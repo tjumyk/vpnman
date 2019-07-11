@@ -4,7 +4,7 @@ from typing import Optional, List
 
 from error import BasicError
 from models import ClientCredential, Client, db
-from tools.cert import CertTool, BuildPKeyParams, BuildCertParams, PKey, Cert
+from tools.cert import CertTool, BuildPKeyParams, BuildCertParams
 
 
 class CredentialServiceError(BasicError):
@@ -114,9 +114,14 @@ class CredentialService:
 
     @classmethod
     def import_for_client(cls, client: Client, cert_data: bytes, pkey_data: bytes,
-                          is_revoked: bool = False, revoked_at: datetime = None) -> ClientCredential:
-        # load cert and pkey
+                          is_revoked: bool = False, revoked_at: datetime = None,
+                          check_common_name: bool = True) -> ClientCredential:
+        # load cert
         cert = CertTool.load_cert(cert_data)
+        if check_common_name and cert.common_name != client.name:
+            raise CredentialServiceError('cert common name does not match client name')
+
+        # load pkey
         pkey = CertTool.load_pkey(pkey_data)
 
         # verify cert and pkey
