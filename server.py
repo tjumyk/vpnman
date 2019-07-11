@@ -145,12 +145,15 @@ def import_credential(client_name: str, cert_file: str, pkey_file: str, revoked_
     with open(pkey_file, 'rb') as f_pkey:
         pkey_data = f_pkey.read()
 
+    is_revoked = revoked_at is not None
     cred = CredentialService.import_for_client(
         client, cert_data, pkey_data,
-        is_revoked=revoked_at is not None, revoked_at=revoked_at,
+        is_revoked=is_revoked, revoked_at=revoked_at,
         check_common_name=check_common_name
     )
     db.session.commit()
+    if is_revoked:
+        CredentialService.update_crl()
     print(json.dumps(cred.to_dict(with_client=False, with_cert=False, with_pkey=False), indent=2))
 
 
