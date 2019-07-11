@@ -1,6 +1,8 @@
 import json
 import os
+from datetime import datetime
 
+import click
 from flask import Flask, request, jsonify, send_from_directory
 
 from auth_connect import oauth
@@ -15,6 +17,7 @@ app.config.from_mapping(_config)
 
 db.init_app(app)
 CredentialService.init(_config.get('CREDENTIAL_SERVICE'))
+
 
 # import logging
 # logging.basicConfig()
@@ -95,6 +98,27 @@ def create_db():
 @app.cli.command()
 def drop_db():
     db.drop_all()
+
+
+@app.cli.command()
+@click.argument('client_id', type=int)
+@click.argument('cert_file')
+@click.argument('pkey_file')
+@click.option('-r', '--revoked-at', type=click.DateTime())
+def import_credential(client_id: int, cert_file: str, pkey_file: str, revoked_at: datetime):
+    client = ClientService.get(client_id)
+    if client is None:
+        print('client not found')
+        exit(1)
+
+    with open(cert_file, 'rb') as f_cert:
+        cert_data = f_cert.read()
+    with open(pkey_file, 'rb') as f_pkey:
+        pkey_data = f_pkey.read()
+
+    CredentialService.import_for_client(client, cert_data, pkey_data,
+                                        is_revoked=revoked_at is not None, revoked_at=revoked_at)
+    db.session.commit()
 
 
 if __name__ == '__main__':
