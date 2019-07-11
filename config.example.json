@@ -6,6 +6,8 @@
   "SESSION_COOKIE_NAME": "vpnman_session",
 
   "CREDENTIAL_SERVICE": {
+    "ca_cert_path": "/etc/openvpn/ca.crt",
+    "ca_pkey_path": "/etc/openvpn/ca.key",
     "cert_valid_days": 3650,
     "cert_subject_default_fields": {
       "countryName": "AU",

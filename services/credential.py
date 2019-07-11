@@ -12,11 +12,15 @@ class CredentialServiceError(BasicError):
 
 
 class CredentialService:
+    _ca_cert_path = '/etc/openvpn/ca.crt'
+    _ca_pkey_path = '/etc/openvpn/ca.key'
     _cert_valid_days = 365
     _cert_subject_default_fields = {}
 
     @classmethod
     def init(cls, config: dict):
+        cls._ca_cert_path = config.get('ca_cert_path', cls._ca_cert_path)
+        cls._ca_pkey_path = config.get('ca_pkey_path', cls._ca_pkey_path)
         cls._cert_valid_days = config.get('cert_valid_days', cls._cert_valid_days)
         cls._cert_subject_default_fields = config.get('cert_subject_default_fields', cls._cert_subject_default_fields)
 
@@ -81,7 +85,7 @@ class CredentialService:
         return cred
 
     @classmethod
-    def generate_for_client(cls, client: Client, ca_cert: Cert, ca_pkey: PKey) -> ClientCredential:
+    def generate_for_client(cls, client: Client) -> ClientCredential:
         if client is None:
             raise CredentialServiceError('client is required')
 
@@ -90,23 +94,21 @@ class CredentialService:
             if not old_cred.is_revoked:
                 cls.revoke(old_cred)
 
-        # generate pkey and cert
+        # prepare params
         now = datetime.utcnow()
         subject = dict(cls._cert_subject_default_fields)  # make a copy first
         subject['commonName'] = client.name
         if client.email:
             subject['emailAddress'] = client.email
+        pkey_params = BuildPKeyParams(2048)
+        cert_params = BuildCertParams(uuid.uuid4().int, now, now + timedelta(days=cls._cert_valid_days), subject)
 
-        pkey, cert = CertTool.build_client(
-            BuildPKeyParams(2048),
-            BuildCertParams(
-                uuid.uuid4().int,
-                now,
-                now + timedelta(days=cls._cert_valid_days),
-                subject
-            ),
-            ca_cert, ca_pkey
-        )
+        # load ca cert and ca pkey
+        ca_cert = CertTool.load_cert_file(cls._ca_cert_path)
+        ca_pkey = CertTool.load_pkey_file(cls._ca_pkey_path)
+
+        # start build
+        pkey, cert = CertTool.build_client(pkey_params, cert_params, ca_cert, ca_pkey)
 
         return cls._add(client, cert.dump(), pkey.dump())
 
