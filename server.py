@@ -7,7 +7,7 @@ from flask import Flask, request, jsonify, send_from_directory, json
 from auth_connect import oauth
 from models import db
 from services.client import ClientService, ClientServiceError
-from services.credential import CredentialService
+from services.credential import CredentialService, CredentialServiceError
 
 app = Flask(__name__)
 with open('config.json') as _f_config:
@@ -115,6 +115,24 @@ def api_admin_client_detail(cid: int):
         return jsonify(client.to_dict(with_active_credential=False, with_all_credentials=True,
                                       with_credential_details=True))
     except ClientServiceError as e:
+        return jsonify(msg=e.msg, detail=e.detail), 500
+
+
+@app.route('/api/admin/credentials/<int:cid>/revoke', methods=['PUT', 'DELETE'])
+@oauth.requires_admin
+def api_admin_credential_revoke(cid: int):
+    try:
+        cred = CredentialService.get(cid)
+        if cred is None:
+            return jsonify(msg='credential not found'), 400
+
+        if request.method == 'PUT':
+            CredentialService.revoke(cred)
+        else:  # DELETE
+            CredentialService.unrevoke(cred)
+        db.session.commit()
+        CredentialService.update_crl()
+    except CredentialServiceError as e:
         return jsonify(msg=e.msg, detail=e.detail), 500
 
 
