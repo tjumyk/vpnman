@@ -153,7 +153,7 @@ def api_my_client_export_config():
         rv.expires = int(time.time())
 
         return rv
-    except (oauth.OAuthError, ClientServiceError) as e:
+    except (oauth.OAuthError, ClientServiceError, CredentialServiceError) as e:
         return jsonify(msg=e.msg, detail=e.detail), 500
 
 
