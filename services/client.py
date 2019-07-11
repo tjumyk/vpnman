@@ -35,6 +35,13 @@ class ClientService:
         return Client.query.filter_by(user_id=user_id).first()
 
     @staticmethod
+    def get_by_name(name: str) -> Optional[Client]:
+        if not name:
+            raise ClientServiceError('name is required')
+
+        return Client.query.filter_by(name=name).first()
+
+    @staticmethod
     def add(user_id: int, name: str, email: str = None) -> Client:
         if user_id is None:
             raise ClientServiceError('user id is required')
