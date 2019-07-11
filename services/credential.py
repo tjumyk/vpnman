@@ -98,17 +98,16 @@ class CredentialService:
         return cred
 
     @classmethod
-    def generate_for_client(cls, client: Client) -> ClientCredential:
+    def generate_for_client(cls, client: Client, revoke_old: bool = False) -> ClientCredential:
         if client is None:
             raise CredentialServiceError('client is required')
 
-        if any(not cred.is_revoked for cred in client.credentials):
-            raise CredentialServiceError('client already has active credentials')
-
-        # revoke all old credentials
         for old_cred in client.credentials:
             if not old_cred.is_revoked:
-                cls.revoke(old_cred)
+                if revoke_old:
+                    cls.revoke(old_cred)
+                else:
+                    raise CredentialServiceError('client already has active credentials')
 
         # prepare params
         now = datetime.utcnow()
