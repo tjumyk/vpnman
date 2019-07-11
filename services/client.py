@@ -64,5 +64,8 @@ class ClientService:
         if client is not None:  # client already exists, check if basic fields match
             if client.name != user.name:
                 raise ClientServiceError('user name mismatch with client name')
+            # for mismatches in other fields, just update them
+            if client.email != user.email:
+                client.email = user.email
         else:
             cls.add(user.id, user.name, user.email)
