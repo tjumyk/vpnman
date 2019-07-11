@@ -6,6 +6,7 @@ from typing import Optional, List
 from error import BasicError
 from models import ClientCredential, Client, db
 from tools.cert import CertTool, BuildPKeyParams, BuildCertParams
+from tools.config import ConfigTool
 
 
 class CredentialServiceError(BasicError):
@@ -19,6 +20,9 @@ class CredentialService:
     _cert_valid_days = 365
     _cert_subject_default_fields = {}
     _crl_valid_days = 30
+    _tls_auth_key_path = '/etc/openvpn/ta.key'
+    _client_base_config_path = '/etc/openvpn/client_base.conf'
+    _linux_client_base_config_path = '/etc/openvpn/client_base_linux.conf'
 
     @classmethod
     def init(cls, config: dict):
@@ -28,6 +32,10 @@ class CredentialService:
         cls._cert_valid_days = config.get('cert_valid_days', cls._cert_valid_days)
         cls._cert_subject_default_fields = config.get('cert_subject_default_fields', cls._cert_subject_default_fields)
         cls._crl_valid_days = config.get('crl_valid_days', cls._crl_valid_days)
+        cls._tls_auth_key_path = config.get('tls_auth_key_path', cls._tls_auth_key_path)
+        cls._client_base_config_path = config.get('client_base_config_path', cls._client_base_config_path)
+        cls._linux_client_base_config_path = config.get('linux_client_base_config_path',
+                                                        cls._linux_client_base_config_path)
 
     @staticmethod
     def get(_id: int) -> Optional[ClientCredential]:
@@ -174,3 +182,21 @@ class CredentialService:
         # update crl file
         with open(cls._crl_path, 'wb') as f:
             f.write(crl.dump())
+
+    @classmethod
+    def export_client_config(cls, cred: ClientCredential, is_linux: bool = False) -> str:
+        if cred is None:
+            raise CredentialServiceError('credential is required')
+
+        # load ca cert
+        ca_cert = CertTool.load_cert_file(cls._ca_cert_path)
+
+        # load client credentials
+        cert = CertTool.load_cert(cred.cert)
+        pkey = CertTool.load_pkey(cred.pkey)
+
+        if is_linux:
+            base_config_path = cls._linux_client_base_config_path
+        else:
+            base_config_path = cls._client_base_config_path
+        return ConfigTool.build_client_config(base_config_path, ca_cert, cert, pkey, cls._tls_auth_key_path)

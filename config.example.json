@@ -9,6 +9,9 @@
     "ca_cert_path": "/etc/openvpn/ca.crt",
     "ca_pkey_path": "/etc/openvpn/ca.key",
     "crl_path": "/etc/openvpn/crl.pem",
+    "tls_auth_key_path": "/etc/openvpn/ta.key",
+    "client_base_config_path": "/etc/openvpn/client_base.conf",
+    "linux_client_base_config_path": "/etc/openvpn/client_base_linux.conf",
     "cert_valid_days": 3650,
     "cert_subject_default_fields": {
       "countryName": "AU",

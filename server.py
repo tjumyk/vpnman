@@ -1,8 +1,9 @@
 import os
+import time
 from datetime import datetime
 
 import click
-from flask import Flask, request, jsonify, send_from_directory, json
+from flask import Flask, request, jsonify, send_from_directory, json, current_app
 
 from auth_connect import oauth
 from models import db
@@ -90,6 +91,49 @@ def api_my_client_details():
 
         return jsonify(client.to_dict(with_active_credential=False, with_all_credentials=True,
                                       with_credential_details=True))
+    except (oauth.OAuthError, ClientServiceError) as e:
+        return jsonify(msg=e.msg, detail=e.detail), 500
+
+
+@app.route('/api/my-client/export-config')
+@oauth.requires_login
+def api_my_client_export_config():
+    try:
+        user = oauth.get_user()
+        client = ClientService.get_by_user_id(user.id)
+        if client is None:
+            return jsonify(msg='client not found'), 500
+
+        # find active credential
+        active_cred = None
+        for cred in client.credentials:
+            if not cred.is_revoked:
+                active_cred = cred
+                break
+        if active_cred is None:
+            return jsonify(msg='no active credential'), 400
+
+        # generate client config
+        is_linux = request.args.get('linux') == 'true'
+        if is_linux:
+            config_file_name = '%s_linux.ovpn' % client.name
+        else:
+            config_file_name = '%s.ovpn' % client.name
+        config_data = CredentialService.export_client_config(active_cred, is_linux=is_linux)
+
+        # make response
+        rv = current_app.response_class(
+            config_data,
+            mimetype='text/plain',
+            headers={
+                'Content-Disposition': 'attachment; filename="%s"' % config_file_name
+            }
+        )
+        # disable cache
+        rv.cache_control.max_age = 0
+        rv.expires = int(time.time())
+
+        return rv
     except (oauth.OAuthError, ClientServiceError) as e:
         return jsonify(msg=e.msg, detail=e.detail), 500
 
