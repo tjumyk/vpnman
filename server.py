@@ -95,6 +95,25 @@ def api_my_client_details():
         return jsonify(msg=e.msg, detail=e.detail), 500
 
 
+@app.route('/api/my-client/generate-credential')
+@oauth.requires_login
+def api_my_client_generate_credential():
+    try:
+        user = oauth.get_user()
+        client = ClientService.get_by_user_id(user.id)
+        if client is None:
+            return jsonify(msg='client not found'), 500
+
+        revoke_old = request.args.get('revoke-old') == 'true'
+        cred = CredentialService.generate_for_client(client, revoke_old=revoke_old)
+
+        db.session.commit()
+        CredentialService.update_crl()
+        return jsonify(cred.to_dict(with_cert=False, with_pkey=False))
+    except (oauth.OAuthError, ClientServiceError, CredentialServiceError) as e:
+        return jsonify(msg=e.msg, detail=e.detail), 500
+
+
 @app.route('/api/my-client/export-config')
 @oauth.requires_login
 def api_my_client_export_config():
@@ -158,6 +177,24 @@ def api_admin_client_detail(cid: int):
 
         return jsonify(client.to_dict(with_active_credential=False, with_all_credentials=True,
                                       with_credential_details=True))
+    except ClientServiceError as e:
+        return jsonify(msg=e.msg, detail=e.detail), 500
+
+
+@app.route('/api/admin/clients/<int:cid>/generate-credential')
+@oauth.requires_admin
+def api_admin_client_generate_credential(cid: int):
+    try:
+        client = ClientService.get(cid)
+        if client is None:
+            return jsonify(msg='client not found'), 400
+
+        revoke_old = request.args.get('revoke-old') == 'true'
+        cred = CredentialService.generate_for_client(client, revoke_old=revoke_old)
+
+        db.session.commit()
+        CredentialService.update_crl()
+        return jsonify(cred.to_dict(with_cert=False, with_pkey=False))
     except ClientServiceError as e:
         return jsonify(msg=e.msg, detail=e.detail), 500
 
