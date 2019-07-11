@@ -144,8 +144,8 @@ class CRL:
     def crl(self) -> crypto.CRL:
         return self._crl
 
-    def dump(self) -> str:
-        return crypto.dump_crl(crypto.FILETYPE_PEM, self._crl).decode()
+    def dump(self) -> bytes:
+        return crypto.dump_crl(crypto.FILETYPE_PEM, self._crl)
 
     def dump_text(self) -> str:
         return crypto.dump_crl(crypto.FILETYPE_TEXT, self._crl).decode()
