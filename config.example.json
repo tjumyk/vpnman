@@ -8,6 +8,7 @@
   "CREDENTIAL_SERVICE": {
     "ca_cert_path": "/etc/openvpn/ca.crt",
     "ca_pkey_path": "/etc/openvpn/ca.key",
+    "crl_path": "/etc/openvpn/crl.pem",
     "cert_valid_days": 3650,
     "cert_subject_default_fields": {
       "countryName": "AU",
