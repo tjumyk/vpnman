@@ -11,7 +11,7 @@ class ConfigToolError(BasicError):
 
 class ConfigTool:
     @staticmethod
-    def build_server_config(base_config_path: str, additional_lines: List[str] = None):
+    def build_server_config(base_config_path: str, additional_lines: List[str] = None) -> str:
         if not base_config_path:
             raise ConfigToolError('base config path is required')
         if not os.path.exists(base_config_path):
@@ -22,12 +22,12 @@ class ConfigTool:
 
         full_config = base_config
         if additional_lines:
-            full_config = '%s\n%s' % (full_config, '\n'.join(additional_lines))
+            full_config = '%s\n%s\n' % (full_config, '\n'.join(additional_lines))
         return full_config
 
     @staticmethod
     def build_client_config(base_config_path: str, ca_cert: Cert, client_cert: Cert, client_pkey: PKey,
-                            tls_auth_key_path: str, additional_lines: List[str] = None):
+                            tls_auth_key_path: str, additional_lines: List[str] = None) -> str:
         if not base_config_path:
             raise ConfigToolError('base config path is required')
         if not os.path.exists(base_config_path):
@@ -51,7 +51,7 @@ class ConfigTool:
 
         full_config = base_config
         if additional_lines:
-            full_config = '%s\n%s' % (full_config, '\n'.join(additional_lines))
+            full_config = '%s\n%s\n' % (full_config, '\n'.join(additional_lines))
         full_config = '%s\n<ca>\n%s</ca>\n<cert>\n%s</cert>\n<key>\n%s</key>\n<tls-auth>\n%s</tls-auth>\n' % (
             full_config,
             ca_cert.dump().decode(),
