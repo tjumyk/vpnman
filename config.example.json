@@ -18,6 +18,7 @@
       "commonName": "client",
       "emailAddress": "client@kg.unsw.edu.au",
       "name": "server"
-    }
+    },
+    "crl_valid_days": 3650
   }
 }

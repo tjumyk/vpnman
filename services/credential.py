@@ -4,7 +4,7 @@ from typing import Optional, List
 
 from error import BasicError
 from models import ClientCredential, Client, db
-from tools.cert import CertTool, BuildPKeyParams, BuildCertParams
+from tools.cert import CertTool, BuildPKeyParams, BuildCertParams, CRL
 
 
 class CredentialServiceError(BasicError):
@@ -16,6 +16,7 @@ class CredentialService:
     _ca_pkey_path = '/etc/openvpn/ca.key'
     _cert_valid_days = 365
     _cert_subject_default_fields = {}
+    _crl_valid_days = 30
 
     @classmethod
     def init(cls, config: dict):
@@ -23,6 +24,7 @@ class CredentialService:
         cls._ca_pkey_path = config.get('ca_pkey_path', cls._ca_pkey_path)
         cls._cert_valid_days = config.get('cert_valid_days', cls._cert_valid_days)
         cls._cert_subject_default_fields = config.get('cert_subject_default_fields', cls._cert_subject_default_fields)
+        cls._crl_valid_days = config.get('crl_valid_days', cls._crl_valid_days)
 
     @staticmethod
     def get(_id: int) -> Optional[ClientCredential]:
@@ -133,3 +135,15 @@ class CredentialService:
         # verify cert against ca
         CertTool.verify_cert_ca(cert, ca_cert)
         return cls._add(client, cert_data, pkey_data, is_revoked, revoked_at, is_imported=True)
+
+    @classmethod
+    def generate_crl(cls) -> CRL:
+        # load revoked certs
+        revoke_list = [(CertTool.load_cert(cred.cert), cred.revoked_at) for cred in cls.get_all_revoked()]
+
+        # load ca cert and ca pkey
+        ca_cert = CertTool.load_cert_file(cls._ca_cert_path)
+        ca_pkey = CertTool.load_pkey_file(cls._ca_pkey_path)
+
+        # start build
+        return CertTool.build_crl(revoke_list, ca_cert, ca_pkey, cls._crl_valid_days)
