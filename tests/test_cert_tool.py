@@ -189,5 +189,12 @@ class TestCertTool(unittest.TestCase):
             ca_pkey,
             365
         )
-
         print(crl.dump_text())
+
+        empty_crl = CertTool.build_crl(
+            [],
+            ca_cert,
+            ca_pkey,
+            365
+        )
+        print(empty_crl.dump_text())
