@@ -94,9 +94,9 @@ def api_my_client_details():
         return jsonify(msg=e.msg, detail=e.detail), 500
 
 
-@app.route('/api/clients')
+@app.route('/api/admin/clients')
 @oauth.requires_admin
-def api_all_clients():
+def api_admin_all_clients():
     try:
         clients = ClientService.get_all()
         return jsonify([client.to_dict() for client in clients])
@@ -104,9 +104,9 @@ def api_all_clients():
         return jsonify(msg=e.msg, detail=e.detail), 500
 
 
-@app.route('/api/clients/<int:cid>')
+@app.route('/api/admin/clients/<int:cid>')
 @oauth.requires_admin
-def api_client_detail(cid: int):
+def api_admin_client_detail(cid: int):
     try:
         client = ClientService.get(cid)
         if client is None:
