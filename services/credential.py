@@ -115,4 +115,16 @@ class CredentialService:
     @classmethod
     def import_for_client(cls, client: Client, cert_data: bytes, pkey_data: bytes,
                           is_revoked: bool = False, revoked_at: datetime = None) -> ClientCredential:
+        # load cert and pkey
+        cert = CertTool.load_cert(cert_data)
+        pkey = CertTool.load_pkey(pkey_data)
+
+        # verify cert and pkey
+        CertTool.verify_cert_pkey(cert, pkey)
+
+        # load ca cert
+        ca_cert = CertTool.load_cert_file(cls._ca_cert_path)
+
+        # verify cert against ca
+        CertTool.verify_cert_ca(cert, ca_cert)
         return cls._add(client, cert_data, pkey_data, is_revoked, revoked_at, is_imported=True)
