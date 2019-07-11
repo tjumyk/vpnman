@@ -1,5 +1,6 @@
 import glob
 import os
+import re
 import unittest
 import uuid
 from datetime import datetime, timedelta
@@ -34,6 +35,41 @@ class TestCertTool(unittest.TestCase):
             pkey = CertTool.load_pkey_file(pkey_path)
             print(pkey)
             CertTool.verify_cert_pkey(cert, pkey)
+
+    def test_dump(self):
+        regex_begin_certificate = re.compile(r'^-+BEGIN CERTIFICATE-+$', re.IGNORECASE)
+
+        for path in ['openvpn-ca/keys/ca.crt', 'openvpn-ca/keys/server.crt', 'openvpn-ca/keys/ymiao.crt']:
+            cert_path = os.path.join(data_folder, path)
+            with open(cert_path, 'rb') as f:
+                cert_data = f.read()
+
+            # it is possible that the cert file prepends the text format data before the PEM content
+            if cert_data and cert_data[0] != '-':  # remove text data before comparison
+                lines = cert_data.decode().split('\n')
+                begin_line = None
+                for i, line in enumerate(lines):
+                    if regex_begin_certificate.match(line):
+                        begin_line = i
+                        break
+                cert_data = '\n'.join(lines[begin_line:]).encode()
+
+            cert = CertTool.load_cert_file(cert_path)
+            self.assertEqual(cert_data, cert.dump())
+
+        for path in ['openvpn-ca/keys/ca.key', 'openvpn-ca/keys/server.key', 'openvpn-ca/keys/ymiao.key']:
+            pkey_path = os.path.join(data_folder, path)
+            with open(pkey_path, 'rb') as f:
+                pkey_data = f.read()
+            pkey = CertTool.load_pkey_file(pkey_path)
+            self.assertEqual(pkey_data, pkey.dump())
+
+        for path in ['openvpn-ca/keys/crl.pem']:
+            crl_path = os.path.join(data_folder, path)
+            with open(crl_path, 'rb') as f:
+                crl_data = f.read()
+            crl = CertTool.load_crl_file(crl_path)
+            self.assertEqual(crl_data, crl.dump())
 
     def test_load_crl(self):
         print('=== CRL ===')
