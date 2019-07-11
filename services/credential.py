@@ -93,6 +93,9 @@ class CredentialService:
         if client is None:
             raise CredentialServiceError('client is required')
 
+        if any(not cred.is_revoked for cred in client.credentials):
+            raise CredentialServiceError('client already has active credentials')
+
         # revoke all old credentials
         for old_cred in client.credentials:
             if not old_cred.is_revoked:
@@ -126,6 +129,9 @@ class CredentialService:
             raise CredentialServiceError('cert data is required')
         if not pkey_data:
             raise CredentialServiceError('pkey data is required')
+
+        if not is_revoked and any(not cred.is_revoked for cred in client.credentials):
+            raise CredentialServiceError('client already has active credentials')
 
         # load cert
         cert = CertTool.load_cert(cert_data)
