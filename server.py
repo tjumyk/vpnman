@@ -9,6 +9,7 @@ from auth_connect import oauth
 from models import db, ClientCredential
 from services.client import ClientService, ClientServiceError
 from services.credential import CredentialService, CredentialServiceError
+from tools.cert import CertTool
 
 app = Flask(__name__)
 with open('config.json') as _f_config:
@@ -240,6 +241,33 @@ def import_client(user_id: int, name: str, email: str):
     client = ClientService.add(user_id, name, email)
     db.session.commit()
     print(json.dumps(client.to_dict(), indent=2))
+
+
+@app.cli.command()
+@click.argument('file_path')
+@click.option('-t', '--file-type')
+def dump(file_path: str, file_type: str):
+    if file_type is None:  # auto detect
+        file_name = os.path.basename(file_path)
+        if file_name == 'crl.pem':
+            file_type = 'crl'
+        else:
+            _, ext = os.path.splitext(file_name)
+            if ext == '.crt':
+                file_type = 'cert'
+            elif ext == '.key':
+                file_type = 'pkey'
+
+    if file_type:
+        file_type = file_type.lower()
+    if file_type == 'cert':
+        print(CertTool.load_cert_file(file_path).dump_text())
+    elif file_type == 'pkey':
+        print(CertTool.load_pkey_file(file_path).dump_text())
+    elif file_type == 'crl':
+        print(CertTool.load_crl_file(file_path).dump_text())
+    else:
+        print('File type not supported')
 
 
 if __name__ == '__main__':
