@@ -6,7 +6,7 @@ import click
 from flask import Flask, request, jsonify, send_from_directory, json, current_app
 
 from auth_connect import oauth
-from models import db
+from models import db, ClientCredential
 from services.client import ClientService, ClientServiceError
 from services.credential import CredentialService, CredentialServiceError
 
@@ -75,84 +75,53 @@ def api_my_client():
         if client is None:
             return jsonify(msg='client not found'), 500
 
-        return jsonify(client.to_dict())
+        with_details = request.args.get('details') == 'true'
+        return jsonify(client.to_dict(with_credential_details=with_details))
     except (oauth.OAuthError, ClientServiceError) as e:
         return jsonify(msg=e.msg, detail=e.detail), 500
 
 
-@app.route('/api/my-client/details')
+def _export_config(cred: ClientCredential):
+    client = cred.client
+    # generate client config
+    is_linux = request.args.get('linux') == 'true'
+    if is_linux:
+        config_file_name = '%s_linux.ovpn' % client.name
+    else:
+        config_file_name = '%s.ovpn' % client.name
+    config_data = CredentialService.export_client_config(cred, is_linux=is_linux)
+
+    # make response
+    rv = current_app.response_class(
+        config_data,
+        mimetype='text/plain',
+        headers={
+            'Content-Disposition': 'attachment; filename="%s"' % config_file_name
+        }
+    )
+    # disable cache
+    rv.cache_control.max_age = 0
+    rv.expires = int(time.time())
+    return rv
+
+
+@app.route('/api/my-credentials/<int:cid>/export-config')
 @oauth.requires_login
-def api_my_client_details():
+def api_my_credential_export_config(cid):
     try:
         user = oauth.get_user()
         client = ClientService.get_by_user_id(user.id)
         if client is None:
             return jsonify(msg='client not found'), 500
 
-        return jsonify(client.to_dict(with_active_credential=False, with_all_credentials=True,
-                                      with_credential_details=True))
-    except (oauth.OAuthError, ClientServiceError) as e:
-        return jsonify(msg=e.msg, detail=e.detail), 500
+        cred = CredentialService.get(cid)
+        if cred is None:
+            return jsonify(msg='credential not found'), 404
 
+        if cred.client_id != client.id:
+            return jsonify(msg='credential does not belong to you'), 403
 
-@app.route('/api/my-client/generate-credential')
-@oauth.requires_login
-def api_my_client_generate_credential():
-    try:
-        user = oauth.get_user()
-        client = ClientService.get_by_user_id(user.id)
-        if client is None:
-            return jsonify(msg='client not found'), 500
-
-        revoke_old = request.args.get('revoke-old') == 'true'
-        cred = CredentialService.generate_for_client(client, revoke_old=revoke_old)
-
-        db.session.commit()
-        CredentialService.update_crl()
-        return jsonify(cred.to_dict(with_cert=False, with_pkey=False))
-    except (oauth.OAuthError, ClientServiceError, CredentialServiceError) as e:
-        return jsonify(msg=e.msg, detail=e.detail), 500
-
-
-@app.route('/api/my-client/export-config')
-@oauth.requires_login
-def api_my_client_export_config():
-    try:
-        user = oauth.get_user()
-        client = ClientService.get_by_user_id(user.id)
-        if client is None:
-            return jsonify(msg='client not found'), 500
-
-        # find active credential
-        active_cred = None
-        for cred in client.credentials:
-            if not cred.is_revoked:
-                active_cred = cred
-                break
-        if active_cred is None:
-            return jsonify(msg='no active credential'), 400
-
-        # generate client config
-        is_linux = request.args.get('linux') == 'true'
-        if is_linux:
-            config_file_name = '%s_linux.ovpn' % client.name
-        else:
-            config_file_name = '%s.ovpn' % client.name
-        config_data = CredentialService.export_client_config(active_cred, is_linux=is_linux)
-
-        # make response
-        rv = current_app.response_class(
-            config_data,
-            mimetype='text/plain',
-            headers={
-                'Content-Disposition': 'attachment; filename="%s"' % config_file_name
-            }
-        )
-        # disable cache
-        rv.cache_control.max_age = 0
-        rv.expires = int(time.time())
-
-        return rv
+        return _export_config(cred)
     except (oauth.OAuthError, ClientServiceError, CredentialServiceError) as e:
         return jsonify(msg=e.msg, detail=e.detail), 500
 
@@ -169,14 +138,13 @@ def api_admin_all_clients():
 
 @app.route('/api/admin/clients/<int:cid>')
 @oauth.requires_admin
-def api_admin_client_detail(cid: int):
+def api_admin_client(cid: int):
     try:
         client = ClientService.get(cid)
         if client is None:
             return jsonify(msg='client not found'), 400
 
-        return jsonify(client.to_dict(with_active_credential=False, with_all_credentials=True,
-                                      with_credential_details=True))
+        return jsonify(client.to_dict(with_credential_details=True))
     except ClientServiceError as e:
         return jsonify(msg=e.msg, detail=e.detail), 500
 
@@ -189,13 +157,12 @@ def api_admin_client_generate_credential(cid: int):
         if client is None:
             return jsonify(msg='client not found'), 400
 
-        revoke_old = request.args.get('revoke-old') == 'true'
-        cred = CredentialService.generate_for_client(client, revoke_old=revoke_old)
+        cred = CredentialService.generate_for_client(client)
 
         db.session.commit()
         CredentialService.update_crl()
-        return jsonify(cred.to_dict(with_cert=False, with_pkey=False))
-    except ClientServiceError as e:
+        return jsonify(cred.to_dict())
+    except (ClientServiceError, CredentialServiceError) as e:
         return jsonify(msg=e.msg, detail=e.detail), 500
 
 
@@ -213,6 +180,20 @@ def api_admin_credential_revoke(cid: int):
             CredentialService.unrevoke(cred)
         db.session.commit()
         CredentialService.update_crl()
+        return jsonify(cred.to_dict(with_cert=False, with_pkey=False))
+    except CredentialServiceError as e:
+        return jsonify(msg=e.msg, detail=e.detail), 500
+
+
+@app.route('/api/admin/credentials/<int:cid>/export-config')
+@oauth.requires_admin
+def api_admin_credential_export_config(cid: int):
+    try:
+        cred = CredentialService.get(cid)
+        if cred is None:
+            return jsonify(msg='credential not found'), 404
+
+        return _export_config(cred)
     except CredentialServiceError as e:
         return jsonify(msg=e.msg, detail=e.detail), 500
 
@@ -248,7 +229,7 @@ def import_credential(client_name: str, cert_file: str, pkey_file: str, revoked_
     db.session.commit()
     if is_revoked:
         CredentialService.update_crl()
-    print(json.dumps(cred.to_dict(with_client=False, with_cert=False, with_pkey=False), indent=2))
+    print(json.dumps(cred.to_dict(), indent=2))
 
 
 @app.cli.command()
@@ -258,7 +239,7 @@ def import_credential(client_name: str, cert_file: str, pkey_file: str, revoked_
 def import_client(user_id: int, name: str, email: str):
     client = ClientService.add(user_id, name, email)
     db.session.commit()
-    print(json.dumps(client.to_dict(with_active_credential=False, with_all_credentials=False), indent=2))
+    print(json.dumps(client.to_dict(), indent=2))
 
 
 if __name__ == '__main__':
