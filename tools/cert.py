@@ -95,7 +95,7 @@ class Cert:
             'version': self.version,
             'subject': {k.decode(): v.decode() for k, v in cert.get_subject().get_components()},
             'issuer': {k.decode(): v.decode() for k, v in cert.get_issuer().get_components()},
-            'serial_number': self.serial_number,
+            'serial_number': hex(self.serial_number)[2:],
             'validity_start': self.validity_start,
             'validity_end': self.validity_end,
             'signature_algorithm': self.signature_algorithm,
