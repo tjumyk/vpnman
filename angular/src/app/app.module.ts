@@ -11,7 +11,6 @@ import {ForbiddenComponent} from './forbidden/forbidden.component';
 import {HttpClientModule} from "@angular/common/http";
 import { PageComponent } from './page/page.component';
 import { AdminClientComponent } from './admin-client/admin-client.component';
-import { AdminClientCredentialComponent } from './admin-client-credential/admin-client-credential.component';
 import { ClientCredentialCardComponent } from './client-credential-card/client-credential-card.component';
 import { ClientCardComponent } from './client-card/client-card.component';
 import { MyClientComponent } from './my-client/my-client.component';
@@ -26,7 +25,6 @@ import { MyClientComponent } from './my-client/my-client.component';
     ForbiddenComponent,
     PageComponent,
     AdminClientComponent,
-    AdminClientCredentialComponent,
     ClientCredentialCardComponent,
     ClientCardComponent,
     MyClientComponent,
