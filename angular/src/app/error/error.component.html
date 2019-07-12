@@ -1,0 +1,11 @@
+<div class="ui error message" *ngIf="!is_cleared">
+  <i class="close icon" (click)="is_cleared=true"></i>
+  <div class="header">
+    <i class="times circle icon"></i> {{error.msg || 'unexpected error'}}
+    <a *ngIf="error.redirect_url" class="ui button" (click)="redirect(error.redirect_url)">
+      <i class="icon lock open"></i> Restart Authentication
+    </a>
+  </div>
+  <p *ngIf="error.msg">{{error.detail}}</p>
+  <p *ngIf="!error.msg">{{error}}</p>
+</div>

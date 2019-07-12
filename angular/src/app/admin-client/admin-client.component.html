@@ -1,0 +1,42 @@
+<div class="ui breadcrumb">
+  <a routerLink=".." class="section">Clients</a>
+  <i class="right angle icon divider"></i>
+  <div class="active section" *ngIf="client">{{client.name}}</div>
+</div>
+
+<app-error [error]="error" *ngIf="error"></app-error>
+
+<div class="ui loader centered text active" *ngIf="loading_client">Loading client info...</div>
+
+<ng-container *ngIf="client">
+  <div class="ui header">
+    <i class="icon user"></i>
+    {{client.name}}
+  </div>
+
+  <app-client-card [client]="client"></app-client-card>
+
+  <div class="ui header">
+    <i class="icon key"></i>
+    Credentials
+  </div>
+
+  <div class="ui segment placeholder" *ngIf="client.credentials.length == 0">
+    <div class="ui header center aligned">
+      <div class="content">
+        No Credentials
+        <div class="sub header">Please generate a new one</div>
+      </div>
+    </div>
+  </div>
+
+  <app-client-credential-card [cred]="cred" [adminMode]="true" (error)="error=$event" *ngFor="let cred of client.credentials"></app-client-credential-card>
+
+  <div class="ui segment center aligned basic">
+    <p>
+      <button class="ui button primary" [ngClass]="{'loading disabled': generating_credential}" (click)="generateCredential()">
+        <i class="icon plus"></i> Generate New Credential
+      </button>
+    </p>
+  </div>
+</ng-container>

@@ -1,0 +1,34 @@
+<div class="ui breadcrumb">
+  <a routerLink=".." class="section">Home</a>
+  <i class="right angle icon divider"></i>
+  <div class="active section">My Client</div>
+</div>
+
+<app-error [error]="error" *ngIf="error"></app-error>
+
+<div class="ui loader centered text active" *ngIf="loading_client">Loading my client info...</div>
+
+<ng-container *ngIf="client">
+  <div class="ui header">
+    <i class="icon user"></i>
+    {{client.name}}
+  </div>
+
+  <app-client-card [client]="client"></app-client-card>
+
+  <div class="ui header">
+    <i class="icon key"></i>
+    Credentials
+  </div>
+
+  <div class="ui segment placeholder" *ngIf="client.credentials.length == 0">
+    <div class="ui header center aligned">
+      <div class="content">
+        No Credentials
+        <div class="sub header">Please ask the system administrators to generate one for you.</div>
+      </div>
+    </div>
+  </div>
+
+  <app-client-credential-card [cred]="cred" *ngFor="let cred of client.credentials"></app-client-credential-card>
+</ng-container>

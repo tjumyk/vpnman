@@ -1,0 +1,22 @@
+<div class="ui list horizontal">
+  <div class="item">
+    <div class="header">ID</div>
+    <div class="content">{{client.id}}</div>
+  </div>
+  <div class="item">
+    <div class="header">Name</div>
+    <div class="content">{{client.name}}</div>
+  </div>
+  <div class="item">
+    <div class="header">Email</div>
+    <div class="content">{{client.email || 'N/A'}}</div>
+  </div>
+  <div class="item">
+    <div class="header">Created At</div>
+    <div class="content">{{client.created_at | date: 'medium'}}</div>
+  </div>
+  <div class="item">
+    <div class="header">Updated At</div>
+    <div class="content">{{client.modified_at| date: 'medium'}}</div>
+  </div>
+</div>

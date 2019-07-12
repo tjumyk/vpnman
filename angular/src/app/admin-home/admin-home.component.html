@@ -1,0 +1,30 @@
+<app-error [error]="error" *ngIf="error"></app-error>
+
+<ng-container *ngIf="clients">
+  <div class="ui header">
+    <i class="icon users"></i> Clients
+  </div>
+
+  <table class="ui table unstackable striped selectable compact">
+    <thead>
+    <tr><th>#</th><th>ID</th><th>User ID</th><th>Name</th><th>Email</th><th>Created At</th><th>Updated At</th><th>Operations</th></tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let client of clients; index as i">
+      <td>{{i+1}}</td>
+      <td>{{client.id}}</td>
+      <td>{{client.user_id}}</td>
+      <td>{{client.name}}</td>
+      <td>{{client.email}}</td>
+      <td>{{client.created_at | date: 'short'}}</td>
+      <td>{{client.modified_at | date: 'short'}}</td>
+      <td>
+        <div class="ui buttons mini">
+          <a routerLink="clients/{{client.id}}" class="ui icon button"><i class="icon ellipsis horizontal"></i></a>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</ng-container>
+
