@@ -102,7 +102,7 @@ class Cert:
             'extensions': ext_list,
             'public_key': {
                 'type': _key_type_to_str[public_key.type()],
-                'length': public_key.bits()
+                'bits': public_key.bits()
             }
         }
 
@@ -112,15 +112,11 @@ class PKey:
         self._pkey = pkey
 
     def __repr__(self):
-        return '<PrivateKey (%d bits)>' % self.key_length
+        return '<PrivateKey (%d bits)>' % self._pkey.bits()
 
     @property
     def pkey(self) -> crypto.PKey:
         return self._pkey
-
-    @property
-    def key_length(self) -> int:
-        return self._pkey.bits()
 
     def dump(self) -> bytes:
         return crypto.dump_privatekey(crypto.FILETYPE_PEM, self._pkey)
@@ -132,7 +128,7 @@ class PKey:
         pkey = self._pkey
         return {
             'type': _key_type_to_str[pkey.type()],
-            'length': pkey.bits()
+            'bits': pkey.bits()
         }
 
 
