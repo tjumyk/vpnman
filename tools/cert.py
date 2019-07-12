@@ -364,7 +364,7 @@ class CertTool:
         # have to add extensions in multiple steps
         cert.add_extensions([
             crypto.X509Extension(b'basicConstraints', False, b'CA:FALSE'),
-            crypto.X509Extension(b'nsComment', False, b'Python Generated Server Certificate'),
+            crypto.X509Extension(b'nsComment', False, b'Python Generated Client Certificate'),
             crypto.X509Extension(b'subjectKeyIdentifier', False, b'hash', subject=cert)
         ])
         cert.add_extensions([
