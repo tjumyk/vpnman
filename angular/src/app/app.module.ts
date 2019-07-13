@@ -14,6 +14,7 @@ import { AdminClientComponent } from './admin-client/admin-client.component';
 import { ClientCredentialCardComponent } from './client-credential-card/client-credential-card.component';
 import { ClientCardComponent } from './client-card/client-card.component';
 import { MyClientComponent } from './my-client/my-client.component';
+import { ClientsTableComponent } from './clients-table/clients-table.component';
 
 @NgModule({
   declarations: [
@@ -28,6 +29,7 @@ import { MyClientComponent } from './my-client/my-client.component';
     ClientCredentialCardComponent,
     ClientCardComponent,
     MyClientComponent,
+    ClientsTableComponent,
   ],
   imports: [
     BrowserModule,
