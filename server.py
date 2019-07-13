@@ -216,9 +216,10 @@ def api_admin_manage_info():
                 # map client to db objects via common name (may fail for clients using imported credentials whose common
                 # names are different from the name of the client/user)
                 common_names = {client['common_name'] for client in client_list}
-                client_mapping = ClientService.get_many_by_names(common_names)
+                client_db_mapping = ClientService.get_many_by_names(common_names)
                 for client in client_list:
-                    client['_client_id'] = client_mapping.get(client['common_name'])
+                    db_client = client_db_mapping.get(client['common_name'])
+                    client['_client_id'] = db_client.id if db_client else None
 
             return jsonify(
                 version=sess.version(),
