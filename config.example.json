@@ -13,6 +13,7 @@
     "client_base_config_path": "/etc/openvpn/client_base.conf",
     "linux_client_base_config_path": "/etc/openvpn/client_base_linux.conf",
     "cert_valid_days": 3650,
+    "crl_valid_days": 3650,
     "cert_subject_default_fields": {
       "countryName": "AU",
       "stateOrProvinceName": "NSW",
@@ -22,8 +23,7 @@
       "commonName": "client",
       "emailAddress": "client@kg.unsw.edu.au",
       "name": "server"
-    },
-    "crl_valid_days": 3650
+    }
   },
   "MANAGEMENT_TOOL": {
     "server_host": "localhost",
