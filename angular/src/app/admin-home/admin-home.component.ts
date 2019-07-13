@@ -24,6 +24,17 @@ export class AdminHomeComponent implements OnInit {
     ).subscribe(
       clients => {
         this.clients = clients;
+
+        for(let client of clients){
+          let num_revoked = 0;
+          for(let cred of client.credentials){
+            if(cred.is_revoked){
+              ++num_revoked;
+            }
+          }
+          client['_num_revoked_credentials'] = num_revoked;
+          client['_num_available_credentials'] = client.credentials.length - num_revoked;
+        }
       },
       error => this.error = error.error
     )
