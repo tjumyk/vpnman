@@ -10,6 +10,7 @@ from models import db, ClientCredential
 from services.client import ClientService, ClientServiceError
 from services.credential import CredentialService, CredentialServiceError
 from tools.cert import CertTool
+from tools.manage import ManagementTool
 
 app = Flask(__name__)
 with open('config.json') as _f_config:
@@ -18,6 +19,7 @@ app.config.from_mapping(_config)
 
 db.init_app(app)
 CredentialService.init(_config.get('CREDENTIAL_SERVICE'))
+ManagementTool.init(_config.get('MANAGEMENT_TOOL'))
 
 
 # import logging
