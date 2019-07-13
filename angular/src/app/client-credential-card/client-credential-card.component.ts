@@ -56,6 +56,7 @@ export class ClientCredentialCardComponent implements OnInit {
       cred => {
         this.cred.is_revoked = cred.is_revoked;
         this.cred.revoked_at = cred.revoked_at;
+        this.cred.modified_at = cred.modified_at;
       },
       error => this.error.emit(error.error)
     )
@@ -69,6 +70,7 @@ export class ClientCredentialCardComponent implements OnInit {
       cred => {
         this.cred.is_revoked = cred.is_revoked;
         this.cred.revoked_at = cred.revoked_at;
+        this.cred.modified_at = cred.modified_at;
       },
       error => this.error.emit(error.error)
     )
