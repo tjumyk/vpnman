@@ -1,0 +1,72 @@
+<app-error [error]="error" *ngIf="error"></app-error>
+
+<div class="ui segment padded basic" *ngIf="loadingInfo">
+  <div class="ui loader active centered text inline">Loading Management Info...</div>
+</div>
+
+<ng-container *ngIf="info">
+  <div class="ui segment">
+    <div class="ui grid stackable">
+      <div class="three wide column">
+        <a href="https://openvpn.net/community/" target="_blank">
+          <img class="ui image centered" src="static/assets/openvpn.svg" alt="OpenVPN" width="110">
+        </a>
+      </div>
+      <div class="thirteen wide column">
+        <p><b>Version:</b> {{info.version.openvpn}}</p>
+        <table class="ui table compact">
+          <thead><tr><th>Status</th><th>Server IP</th><th>Bytes In</th><th>Bytes Out</th><th>Number of Clients</th></tr></thead>
+          <tbody>
+          <tr>
+            <ng-container *ngIf="info.state; else no_state">
+              <td [ngClass]="{'positive': info.state.state=='CONNECTED'}">{{info.state.state}}</td>
+              <td>{{info.state.local_ip}}</td>
+            </ng-container>
+            <ng-template #no_state>
+              <td>Unknown</td><td></td>
+            </ng-template>
+            <td>{{info.load_stats.bytesin}}</td>
+            <td>{{info.load_stats.bytesout}}</td>
+            <td>{{info.load_stats.nclients}}</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <table class="ui table unstackable striped selectable compact" *ngIf="info.status.client_list?.length; else empty_client_list">
+    <thead><tr><th>#</th><th>Common Name</th><th>Real Address</th><th>Virtual Address</th><th>Virtual IPv6 Address</th><th>Bytes Received</th><th>Bytes Sent</th><th>Connected Since</th><th>Username</th><th>Client ID</th><th>Peer ID</th><th>Operations</th></tr></thead>
+    <tbody>
+    <tr *ngFor="let client of info.status.client_list; index as i">
+      <td>{{i+1}}</td>
+      <td>{{client.common_name}}</td>
+      <td>{{client.real_address}}</td>
+      <td>{{client.virtual_address}}</td>
+      <td>{{client.virtual_ipv6_address}}</td>
+      <td>{{client.bytes_received}}</td>
+      <td>{{client.bytes_sent}}</td>
+      <td>{{client.connected_since * 1000 | date: 'short'}}</td>
+      <td>{{client.username}}</td>
+      <td>{{client.client_id}}</td>
+      <td>{{client.peer_id}}</td>
+      <td>
+        <div class="ui mini buttons">
+          <a class="ui button icon" routerLink="/admin/clients/{{client._client_id}}" *ngIf="client._client_id">
+            <i class="icon cog"></i>
+          </a>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <ng-template #empty_client_list>
+    <div class="ui segment placeholder">
+      <div class="ui header icon">
+        <i class="icon coffee"></i>
+        No Client Connected
+      </div>
+    </div>
+  </ng-template>
+</ng-container>

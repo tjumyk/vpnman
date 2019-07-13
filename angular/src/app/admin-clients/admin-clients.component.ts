@@ -1,16 +1,15 @@
-import {Component, OnInit} from '@angular/core';
-import {AdminService} from "../admin.service";
+import { Component, OnInit } from '@angular/core';
 import {BasicError, Client} from "../models";
+import {AdminService} from "../admin.service";
 import {finalize} from "rxjs/operators";
 
 @Component({
-  selector: 'app-admin-home',
-  templateUrl: './admin-home.component.html',
-  styleUrls: ['./admin-home.component.less']
+  selector: 'app-admin-clients',
+  templateUrl: './admin-clients.component.html',
+  styleUrls: ['./admin-clients.component.less']
 })
-export class AdminHomeComponent implements OnInit {
+export class AdminClientsComponent implements OnInit {
   error: BasicError;
-
   loadingClients: boolean;
   clients: Client[];
 
@@ -28,4 +27,5 @@ export class AdminHomeComponent implements OnInit {
       error => this.error = error.error
     )
   }
+
 }

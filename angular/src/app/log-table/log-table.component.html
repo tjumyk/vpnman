@@ -1,0 +1,11 @@
+<table class="ui table unstackable selectable striped very compact">
+  <thead><tr><th>Time</th><th>Flags</th><th>Message</th></tr></thead>
+  <tbody>
+  <tr *ngFor="let line of log" class="top aligned"
+      [ngClass]="{'warning': line._max_level==3, 'error': line._max_level>=4}">
+    <td class="white-space-nowrap">{{line.time * 1000 | date: 'short'}}</td>
+    <td>{{line.flags}}</td>
+    <td class="word-break-all">{{line.message}}</td>
+  </tr>
+  </tbody>
+</table>

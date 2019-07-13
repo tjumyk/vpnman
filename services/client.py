@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Dict, Iterable
 
 from sqlalchemy import or_
 
@@ -40,6 +40,17 @@ class ClientService:
             raise ClientServiceError('name is required')
 
         return Client.query.filter_by(name=name).first()
+
+    @staticmethod
+    def get_many_by_names(names: Iterable[str]) -> Dict[str, Client]:
+        if names is None:
+            raise ClientServiceError('names are required')
+
+        results = {}
+        for client in db.session.query(Client) \
+                .filter(Client.name.in_(list(set(names)))):
+            results[client.name] = client
+        return results
 
     @staticmethod
     def add(user_id: int, name: str, email: str = None) -> Client:

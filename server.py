@@ -10,7 +10,7 @@ from models import db, ClientCredential
 from services.client import ClientService, ClientServiceError
 from services.credential import CredentialService, CredentialServiceError
 from tools.cert import CertTool
-from tools.manage import ManagementTool
+from tools.manage import ManagementTool, ManagementToolError
 
 app = Flask(__name__)
 with open('config.json') as _f_config:
@@ -198,6 +198,45 @@ def api_admin_credential_export_config(cid: int):
 
         return _export_config(cred)
     except CredentialServiceError as e:
+        return jsonify(msg=e.msg, detail=e.detail), 500
+
+
+@app.route('/api/admin/manage/info')
+@oauth.requires_admin
+def api_admin_manage_info():
+    try:
+        with ManagementTool.connect() as sess:
+            # get the latest state only
+            states = sess.state(1)
+            state = states[0] if states else None
+
+            status = sess.status()
+            client_list = status.get('client_list')
+            if client_list:
+                # map client to db objects via common name (may fail for clients using imported credentials whose common
+                # names are different from the name of the client/user)
+                common_names = {client['common_name'] for client in client_list}
+                client_mapping = ClientService.get_many_by_names(common_names)
+                for client in client_list:
+                    client['_client_id'] = client_mapping.get(client['common_name'])
+
+            return jsonify(
+                version=sess.version(),
+                status=status,
+                state=state,
+                load_stats=sess.load_stats()
+            )
+    except ManagementToolError as e:
+        return jsonify(msg=e.msg, detail=e.detail), 500
+
+
+@app.route('/api/admin/manage/log')
+@oauth.requires_admin
+def api_admin_manage_log():
+    try:
+        with ManagementTool.connect() as sess:
+            return jsonify(sess.log('all'))
+    except ManagementToolError as e:
         return jsonify(msg=e.msg, detail=e.detail), 500
 
 

@@ -1,0 +1,7 @@
+<app-error [error]="error" *ngIf="error"></app-error>
+
+<div class="ui segment padded basic" *ngIf="loadingClients">
+  <div class="ui loader active centered text inline">Loading Client List...</div>
+</div>
+
+<app-clients-table [clients]="clients" *ngIf="clients"></app-clients-table>

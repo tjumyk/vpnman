@@ -77,3 +77,64 @@ export interface PKey {
 }
 
 
+/* OpenVPN Management Interface */
+
+export interface OpenVPNVersion {
+  management: string;
+  openvpn: string;
+}
+
+export interface OpenVPNStatus {
+  client_list?: OpenVPNClient[];
+  global_stats: OpenVPNGlobalStats;
+  routing_table?: OpenVPNRoute[];
+}
+
+export interface OpenVPNClient {
+  bytes_received: number;
+  bytes_sent: number;
+  client_id: number;
+  common_name: string;
+  connected_since: number;
+  peer_id: number;
+  real_address: string;
+  username: null;
+  virtual_address: string;
+  virtual_ipv6_address: string;
+}
+
+export type OpenVPNGlobalStats = string[];
+
+export interface OpenVPNRoute {
+  common_name: string;
+  last_ref: number;
+  real_address: string;
+  virtual_address: string;
+}
+
+export interface OpenVPNState {
+  description: string;
+  local_ip: string;
+  remote_ip: string;
+  state: string;
+  time: number;
+}
+
+export interface OpenVPNLogLine {
+  flags: string;
+  message: string;
+  time: number;
+}
+
+export interface OpenVPNLoadStats {
+  bytesin: number;
+  bytesout: number;
+  nclients: number;
+}
+
+export interface OpenVPNInfo {
+  load_stats: OpenVPNLoadStats;
+  state?: OpenVPNState;
+  status: OpenVPNStatus;
+  version: OpenVPNVersion;
+}
