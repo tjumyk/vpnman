@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 from flask import json
 
-from tools.cert import CertTool, BuildPKeyParams, BuildCertParams
+from tools.cert import CertTool, BuildPKeyParams, BuildCertParams, CertToolError
 
 data_folder = '/home/kelvin/openvpn-certs'
 
@@ -176,23 +176,25 @@ class TestCertTool(unittest.TestCase):
         ca_pkey = CertTool.load_pkey_file(os.path.join(data_folder, 'openvpn-ca/keys/ca.key'))
 
         now = datetime.utcnow()
+        certs_to_revoke = [
+            CertTool.load_cert_file(os.path.join(data_folder, 'openvpn-ca/keys/03.pem')),
+            CertTool.load_cert_file(os.path.join(data_folder, 'openvpn-ca/keys/07.pem')),
+            CertTool.load_cert_file(os.path.join(data_folder, 'openvpn-ca/keys/0D.pem')),
+        ]
+        certs_not_to_revoke = [
+            CertTool.load_cert_file(os.path.join(data_folder, 'openvpn-ca/keys/ymiao.crt'))
+        ]
 
         crl = CertTool.build_crl(
-            [
-                (CertTool.load_cert_file(os.path.join(data_folder, 'openvpn-ca/keys/03.pem')), now),
-                (CertTool.load_cert_file(os.path.join(data_folder, 'openvpn-ca/keys/07.pem')), now),
-                (CertTool.load_cert_file(os.path.join(data_folder, 'openvpn-ca/keys/0D.pem')), now),
-            ],
+            [(cert, now) for cert in certs_to_revoke],
             ca_cert,
             ca_pkey,
             365
         )
         print(crl.dump_text())
 
-        empty_crl = CertTool.build_crl(
-            [],
-            ca_cert,
-            ca_pkey,
-            365
-        )
-        print(empty_crl.dump_text())
+        for cert in certs_to_revoke:
+            self.assertRaises(CertToolError, CertTool.verify_cert_crl, cert, ca_cert, crl)
+
+        for cert in certs_not_to_revoke:
+            CertTool.verify_cert_crl(cert, ca_cert, crl)

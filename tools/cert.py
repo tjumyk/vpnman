@@ -254,6 +254,18 @@ class CertTool:
         except crypto.X509StoreContextError as e:
             raise CertToolError('CA does not match', e.args[0])
 
+    @staticmethod
+    def verify_cert_crl(cert: Cert, ca_cert: Cert, crl: CRL):
+        store = crypto.X509Store()
+        store.add_cert(ca_cert.x509)
+        store.add_crl(crl.crl)
+        store.set_flags(crypto.X509StoreFlags.CRL_CHECK)
+        store_ctx = crypto.X509StoreContext(store, cert.x509)
+        try:
+            store_ctx.verify_certificate()
+        except crypto.X509StoreContextError as e:
+            raise CertToolError('CRL check failed', e.args[0])
+
     @classmethod
     def verify_cert_pkey(cls, cert: Cert, pkey: PKey):
         if cert is None:
