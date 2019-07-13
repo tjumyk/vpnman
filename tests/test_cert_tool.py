@@ -19,9 +19,7 @@ class TestCertTool(unittest.TestCase):
         print(ca_cert.dump_text())
         ca_pkey = CertTool.load_pkey_file(os.path.join(data_folder, 'openvpn-ca/keys/ca.key'))
         print(ca_pkey)
-        # CertService.verify_cert_pkey(ca_cert, ca_pkey)
-        # ca_cert2 = CertService.load_cert_file('/home/kelvin/EasyRSA-v3.0.6/pki/ca.crt')
-        # print(ca_cert2.dump_text())
+        CertTool.verify_cert_pkey(ca_cert, ca_pkey)
 
         print('=== Clients ===')
         for cert_path in glob.glob(os.path.join(data_folder, 'openvpn-ca/keys/*.crt')):
