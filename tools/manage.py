@@ -278,6 +278,11 @@ class ManagementSession:
                 })
             return results
 
+    def client_kill(self, cid: int):
+        with self._cmd_lock:
+            self._send('client-kill %d' % cid)
+            self._recv()
+
 
 class ManagementTool:
     _server_host = 'localhost'

@@ -38,7 +38,7 @@
   <table class="ui table unstackable striped selectable compact" *ngIf="info.status.client_list?.length; else empty_client_list">
     <thead><tr><th>#</th><th>Common Name</th><th>Real Address</th><th>Virtual Address</th><th>Virtual IPv6 Address</th><th>Bytes Received</th><th>Bytes Sent</th><th>Connected Since</th><th>Username</th><th>Client ID</th><th>Peer ID</th><th>Operations</th></tr></thead>
     <tbody>
-    <tr *ngFor="let client of info.status.client_list; index as i">
+    <tr *ngFor="let client of info.status.client_list; index as i" [ngClass]="{'disabled': client._killed}">
       <td>{{i+1}}</td>
       <td>{{client.common_name}}</td>
       <td>{{client.real_address}}</td>
@@ -55,6 +55,7 @@
           <a class="ui button icon" routerLink="/admin/clients/{{client._db_client_id}}" *ngIf="client._db_client_id" title="Configure">
             <i class="icon cog"></i>
           </a>
+          <button class="ui button icon red" title="Kill" (click)="client_kill(client, btn_client_kill)" #btn_client_kill><i class="icon times"></i></button>
         </div>
       </td>
     </tr>

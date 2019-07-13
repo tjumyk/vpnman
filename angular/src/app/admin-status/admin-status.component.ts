@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {BasicError, OpenVPNInfo} from "../models";
+import {BasicError, OpenVPNClient, OpenVPNInfo} from "../models";
 import {AdminService} from "../admin.service";
 import {finalize} from "rxjs/operators";
 
@@ -25,5 +25,15 @@ export class AdminStatusComponent implements OnInit {
       info => this.info = info,
       error => this.error = error.error
     );
+  }
+
+  client_kill(client: OpenVPNClient, btn: HTMLElement) {
+    btn.classList.add('loading', 'disabled');
+    this.adminService.managementClientKill(client.client_id).pipe(
+      finalize(() => btn.classList.remove('loading', 'disabled'))
+    ).subscribe(
+      () => client['_killed'] = true,
+      error => this.error = error.error
+    )
   }
 }

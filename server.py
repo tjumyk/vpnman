@@ -241,6 +241,17 @@ def api_admin_manage_log():
         return jsonify(msg=e.msg, detail=e.detail), 500
 
 
+@app.route('/api/admin/manage/client-kill/<int:cid>')
+@oauth.requires_admin
+def api_admin_manage_client_kill(cid: int):
+    try:
+        with ManagementTool.connect() as sess:
+            sess.client_kill(cid)
+            return "", 204
+    except ManagementToolError as e:
+        return jsonify(msg=e.msg, detail=e.detail), 500
+
+
 @app.cli.command()
 def create_db():
     db.create_all()

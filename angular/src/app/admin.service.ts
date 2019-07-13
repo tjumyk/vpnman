@@ -37,4 +37,8 @@ export class AdminService {
   getManagementLog(): Observable<OpenVPNLogLine[]>{
     return this.http.get<OpenVPNLogLine[]>('api/admin/manage/log');
   }
+
+  managementClientKill(cid: number): Observable<any>{
+    return this.http.get(`api/admin/manage/client-kill/${cid}`)
+  }
 }
