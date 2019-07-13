@@ -28,6 +28,10 @@ export class AdminStatusComponent implements OnInit {
   }
 
   client_kill(client: OpenVPNClient, btn: HTMLElement) {
+    if (!confirm(`Really want to kill the client connection from ${client.common_name} (client ${client.client_id})?`)) {
+      return;
+    }
+
     btn.classList.add('loading', 'disabled');
     this.adminService.managementClientKill(client.client_id).pipe(
       finalize(() => btn.classList.remove('loading', 'disabled'))

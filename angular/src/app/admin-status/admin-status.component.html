@@ -51,7 +51,7 @@
       <td>{{client.client_id}}</td>
       <td>{{client.peer_id}}</td>
       <td>
-        <div class="ui mini buttons">
+        <div class="ui mini buttons" *ngIf="!client._killed">
           <a class="ui button icon" routerLink="/admin/clients/{{client._db_client_id}}" *ngIf="client._db_client_id" title="Configure">
             <i class="icon cog"></i>
           </a>
