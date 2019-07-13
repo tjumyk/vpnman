@@ -227,7 +227,7 @@ def api_admin_manage_info():
                 state=state,
                 load_stats=sess.load_stats()
             )
-    except ManagementToolError as e:
+    except (ManagementToolError, ClientServiceError) as e:
         return jsonify(msg=e.msg, detail=e.detail), 500
 
 
