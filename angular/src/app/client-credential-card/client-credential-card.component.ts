@@ -16,6 +16,8 @@ export class ClientCredentialCardComponent implements OnInit {
   @Output() error: EventEmitter<BasicError> = new EventEmitter();
 
   is_invalid: boolean;
+  is_before_validity: boolean;
+  is_expired: boolean;
 
   revoking: boolean;
   unrevoking: boolean;
@@ -31,7 +33,13 @@ export class ClientCredentialCardComponent implements OnInit {
         let now = moment.now();
         let start = moment.utc(this.cred.cert.validity_start);
         let end = moment.utc(this.cred.cert.validity_end);
-        if (start.isAfter(now) || end.isBefore(now)) {
+        if (start.isAfter(now)) {
+          this.is_before_validity = true;
+        }
+        if (end.isBefore(now)) {
+          this.is_expired = true;
+        }
+        if (this.is_before_validity || this.is_expired) {
           this.is_invalid = true;
         }
       } else {
