@@ -15,15 +15,16 @@
       <div class="thirteen wide column">
         <p><b>Version:</b> {{info.version.openvpn}}</p>
         <table class="ui table compact unstackable">
-          <thead><tr><th>Status</th><th>Server IP</th><th>Bytes In</th><th>Bytes Out</th><th>Number of Clients</th></tr></thead>
+          <thead><tr><th>Status</th><th>Status Updated At</th><th>Server IP</th><th>Bytes In</th><th>Bytes Out</th><th>Number of Clients</th></tr></thead>
           <tbody>
           <tr>
             <ng-container *ngIf="info.state; else no_state">
               <td [ngClass]="{'positive': info.state.state=='CONNECTED'}">{{info.state.state}}</td>
+              <td>{{info.state.time * 1000 | date: 'short'}}</td>
               <td>{{info.state.local_ip}}</td>
             </ng-container>
             <ng-template #no_state>
-              <td>Unknown</td><td></td>
+              <td>Unknown</td><td>N/A</td><td>N/A</td>
             </ng-template>
             <td>{{info.load_stats.bytesin}}</td>
             <td>{{info.load_stats.bytesout}}</td>
