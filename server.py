@@ -219,7 +219,7 @@ def api_admin_manage_info():
                 client_db_mapping = ClientService.get_many_by_names(common_names)
                 for client in client_list:
                     db_client = client_db_mapping.get(client['common_name'])
-                    client['_client_id'] = db_client.id if db_client else None
+                    client['_db_client_id'] = db_client.id if db_client else None
 
             return jsonify(
                 version=sess.version(),

@@ -52,7 +52,7 @@
       <td>{{client.peer_id}}</td>
       <td>
         <div class="ui mini buttons">
-          <a class="ui button icon" routerLink="/admin/clients/{{client._client_id}}" *ngIf="client._client_id">
+          <a class="ui button icon" routerLink="/admin/clients/{{client._db_client_id}}" *ngIf="client._db_client_id" title="Configure">
             <i class="icon cog"></i>
           </a>
         </div>
