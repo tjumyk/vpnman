@@ -1,4 +1,5 @@
 import os
+import subprocess
 import time
 from datetime import datetime
 
@@ -57,6 +58,12 @@ def page_not_found(error):
     if not os.path.exists(os.path.join(app.static_folder, 'index.html')):
         return send_from_directory(app.root_path, 'building.html', cache_timeout=0), 503
     return app.send_static_file('index.html'), 404
+
+
+@app.route('/api/version')
+def api_version():
+    git_version = subprocess.check_output(['git', 'describe', '--tags']).decode().strip()
+    return jsonify(version=git_version)
 
 
 @app.route('/api/me')
