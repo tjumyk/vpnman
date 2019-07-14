@@ -18,9 +18,11 @@ export class AdminClientsComponent implements OnInit {
   loadingClients: boolean;
   clients: Client[];
 
+  show_import_modal: boolean;
   importing_client: boolean;
   import_client_form = new ImportClientForm();
   imported_client: Client;
+  import_error: BasicError;
 
   constructor(private adminService: AdminService) {
   }
@@ -48,8 +50,9 @@ export class AdminClientsComponent implements OnInit {
       client => {
         this.imported_client = client;
         this.clients.push(client);
+        this.show_import_modal = false;
       },
-      error => this.error = error.error
+      error => this.import_error = error.error
     )
   }
 

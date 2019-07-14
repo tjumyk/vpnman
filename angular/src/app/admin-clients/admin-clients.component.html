@@ -6,21 +6,24 @@
 
 <app-clients-table [clients]="clients" [newClient]="imported_client" *ngIf="clients"></app-clients-table>
 
-<div class="ui segment basic">
-  <div class="ui grid centered stackable">
-    <div class="six wide column">
-      <form class="ui form" #f="ngForm" (ngSubmit)="importClient(f)" [ngClass]="{'loading':importing_client}">
-        <div class="ui raised segment">
-          <div class="required field" [ngClass]="{'error': (f.submitted || user_id_model.touched || user_id_model.dirty) && user_id_model.invalid}">
-            <label>User ID</label>
-            <input type="number" min="1" name="user_id" [(ngModel)]="import_client_form.user_id" #user_id_model="ngModel" required>
-            <div class="errors" *ngIf="user_id_model.errors">
-              <label *ngIf="user_id_model.errors.required"><i class="times icon"></i> User ID is required</label>
-            </div>
-          </div>
-          <button type="submit" class="ui button primary fluid"><i class="icon plus"></i> Import Client</button>
-        </div>
-      </form>
-    </div>
-  </div>
+<div class="ui segment basic center aligned" *ngIf="clients">
+  <div class="ui button primary" (click)="show_import_modal=true"><i class="icon plus"></i>Import Client</div>
 </div>
+
+<app-modal [(show)]="show_import_modal" modalClass="mini">
+  <div class="header">Import Client</div>
+  <div class="content">
+    <app-error [error]="import_error" *ngIf="import_error"></app-error>
+
+    <form class="ui form" #f="ngForm" (ngSubmit)="importClient(f)" [ngClass]="{'loading':importing_client}">
+      <div class="required field" [ngClass]="{'error': (f.submitted || user_id_model.touched || user_id_model.dirty) && user_id_model.invalid}">
+        <label>User ID</label>
+        <input type="number" min="1" name="user_id" [(ngModel)]="import_client_form.user_id" #user_id_model="ngModel" required>
+        <div class="errors" *ngIf="user_id_model.errors">
+          <label *ngIf="user_id_model.errors.required"><i class="times icon"></i> User ID is required</label>
+        </div>
+      </div>
+      <button type="submit" class="ui button primary fluid"><i class="icon plus"></i> Import Client</button>
+    </form>
+  </div>
+</app-modal>
