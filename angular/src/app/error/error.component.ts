@@ -24,7 +24,7 @@ export class ErrorComponent implements OnInit {
   ngOnInit() {
   }
 
-  private updateHost(){
+  private updateHost() {
     if (this._error) {
       this.hostElement.nativeElement.classList.remove('hidden');
     } else {

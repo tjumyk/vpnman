@@ -19,17 +19,19 @@ export class ModalComponent implements OnInit, OnDestroy, AfterViewInit {
   _show: boolean;
   shown: boolean;
 
-  @Input() get show(){
+  @Input() get show() {
     return this._show;
   }
-  set show(show: boolean){
+
+  set show(show: boolean) {
     clearTimeout(this.showTracker);
-    this.showTracker = setTimeout(()=>{
+    this.showTracker = setTimeout(() => {
       this.shown = show;
     }, this.animationDuration);
     this._show = show;
     this.showChange.emit(show);
   }
+
   @Output() showChange: EventEmitter<boolean> = new EventEmitter();
 
   @Input() animationDuration: number = 500; // milliseconds
@@ -51,16 +53,16 @@ export class ModalComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    if(this.modalClass){
+    if (this.modalClass) {
       let classes = this.modalClass.trim();
-      if(classes.length > 0){
+      if (classes.length > 0) {
         this.modalElement.nativeElement.classList.add(...classes.split(/\s+/))
       }
     }
   }
 
-  dimmerClicked(event: MouseEvent, dimmer: HTMLElement){
-    if(event.target == dimmer){
+  dimmerClicked(event: MouseEvent, dimmer: HTMLElement) {
+    if (event.target == dimmer) {
       this.show = false;
       event.stopImmediatePropagation();
     }
