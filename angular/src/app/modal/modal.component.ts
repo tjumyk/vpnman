@@ -16,8 +16,8 @@ import {
   styleUrls: ['./modal.component.less']
 })
 export class ModalComponent implements OnInit, OnDestroy, AfterViewInit {
-  private _show: boolean;
-  private shown: boolean;
+  _show: boolean;
+  shown: boolean;
 
   @Input() get show(){
     return this._show;

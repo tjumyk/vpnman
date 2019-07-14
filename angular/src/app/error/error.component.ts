@@ -8,7 +8,7 @@ import {BasicError} from "../models";
   host: {class: 'ui error message'}
 })
 export class ErrorComponent implements OnInit {
-  private _error: BasicError;
+  _error: BasicError;
   @Input() get error() {
     return this._error;
   }
