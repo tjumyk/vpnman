@@ -10,6 +10,7 @@ export class ClientsTableComponent implements OnInit {
   @Input() clients: Client[];
 
   // use 'newClient' property to process newly added clients
+  // TODO use a more elegant method
   private _newClient: Client;
   @Input() get newClient() {
     return this._newClient;
