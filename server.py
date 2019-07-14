@@ -159,6 +159,22 @@ def api_admin_client(cid: int):
         return jsonify(msg=e.msg, detail=e.detail), 500
 
 
+@app.route('/api/admin/import-client/<int:user_id>')
+@oauth.requires_admin
+def api_admin_import_client(user_id: int):
+    try:
+        client = ClientService.get_by_user_id(user_id)
+        if client is not None:
+            return jsonify(msg='client with user id %d already exists' % user_id), 400
+
+        user = oauth.get_user_by_id(user_id)
+        client = ClientService.add(user_id, user.name, user.email)
+        db.session.commit()
+        return jsonify(client.to_dict())
+    except (oauth.OAuthError, ClientServiceError) as e:
+        return jsonify(msg=e.msg, detail=e.detail), 500
+
+
 @app.route('/api/admin/clients/<int:cid>/generate-credential')
 @oauth.requires_admin
 def api_admin_client_generate_credential(cid: int):

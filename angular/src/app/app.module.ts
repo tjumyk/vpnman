@@ -19,6 +19,7 @@ import { AdminLogComponent } from './admin-log/admin-log.component';
 import { AdminClientsComponent } from './admin-clients/admin-clients.component';
 import { AdminStatusComponent } from './admin-status/admin-status.component';
 import { AdminComponent } from './admin/admin.component';
+import {FormsModule} from "@angular/forms";
 
 @NgModule({
   declarations: [
@@ -42,7 +43,8 @@ import { AdminComponent } from './admin/admin.component';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    HttpClientModule
+    HttpClientModule,
+    FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

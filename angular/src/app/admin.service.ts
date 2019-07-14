@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {Client, ClientCredential, OpenVPNInfo, OpenVPNLogLine} from "./models";
@@ -16,6 +16,10 @@ export class AdminService {
 
   getClient(cid: number): Observable<Client>{
     return this.http.get<Client>(`api/admin/clients/${cid.toString()}`)
+  }
+
+  importClient(user_id: number): Observable<Client> {
+    return this.http.get<Client>(`api/admin/import-client/${user_id}`)
   }
 
   revokeCredential(cid: number): Observable<ClientCredential>{
