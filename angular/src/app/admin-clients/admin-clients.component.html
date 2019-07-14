@@ -11,6 +11,7 @@
 </div>
 
 <app-modal [(show)]="show_import_modal" modalClass="mini">
+  <i class="close icon" (click)="show_import_modal=false"></i>
   <div class="header">Import Client</div>
   <div class="content">
     <app-error [error]="import_error" *ngIf="import_error"></app-error>
