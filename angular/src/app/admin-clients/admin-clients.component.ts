@@ -20,6 +20,7 @@ export class AdminClientsComponent implements OnInit {
 
   importing_client: boolean;
   import_client_form = new ImportClientForm();
+  imported_client: Client;
 
   constructor(private adminService: AdminService) {
   }
@@ -44,7 +45,10 @@ export class AdminClientsComponent implements OnInit {
     this.adminService.importClient(this.import_client_form.user_id).pipe(
       finalize(() => this.importing_client = false)
     ).subscribe(
-      client => this.clients.push(client),
+      client => {
+        this.imported_client = client;
+        this.clients.push(client);
+      },
       error => this.error = error.error
     )
   }

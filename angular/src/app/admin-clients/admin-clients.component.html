@@ -4,7 +4,7 @@
   <div class="ui loader active centered text inline">Loading Client List...</div>
 </div>
 
-<app-clients-table [clients]="clients" *ngIf="clients"></app-clients-table>
+<app-clients-table [clients]="clients" [newClient]="imported_client" *ngIf="clients"></app-clients-table>
 
 <div class="ui segment basic">
   <div class="ui grid centered stackable">
