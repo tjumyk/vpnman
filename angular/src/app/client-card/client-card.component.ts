@@ -9,6 +9,7 @@ import {Client} from "../models";
 })
 export class ClientCardComponent implements OnInit {
   @Input() client: Client;
+  @Input() adminMode: boolean;
 
   constructor() {
   }
