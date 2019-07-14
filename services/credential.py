@@ -92,7 +92,7 @@ class CredentialService:
         if not is_revoked and any(not cred.is_revoked for cred in client.credentials):
             raise CredentialServiceError('client already has active credentials')
 
-        cred = ClientCredential(client_id=client.id, cert=cert_data, pkey=pkey_data,
+        cred = ClientCredential(client=client, cert=cert_data, pkey=pkey_data,
                                 is_revoked=is_revoked, revoked_at=revoked_at, is_imported=is_imported)
         db.session.add(cred)
         return cred
