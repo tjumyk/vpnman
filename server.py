@@ -443,6 +443,7 @@ def import_routes(config_path: str, clear: bool):
         if clear or not ServerConfigService.get_route_by_ip_mask(ip, mask):
             ServerConfigService.add_route(ip, mask, description)
     db.session.commit()
+    ServerConfigService.update_config()
 
 
 if __name__ == '__main__':
