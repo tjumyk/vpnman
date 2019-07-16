@@ -11,7 +11,9 @@
   <i class="icon map signs"></i> Route Rules
 </div>
 
-<div class="ui loader text centered inline active" *ngIf="loadingRoutes">Loading route rules...</div>
+<div class="ui segment padded basic" *ngIf="loadingRoutes">
+  <div class="ui loader text centered inline active">Loading route rules...</div>
+</div>
 
 <ng-container *ngIf="routes">
   <ng-container *ngIf="routes.length; else no_routes">
