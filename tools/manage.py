@@ -280,6 +280,9 @@ class ManagementSession:
 
     def client_kill(self, cid: int):
         with self._cmd_lock:
+            if type(cid) is not int:
+                raise ManagementToolError('cid must be an integer')
+
             self._send('client-kill %d' % cid)
             self._recv()
 
