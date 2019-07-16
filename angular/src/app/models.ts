@@ -51,7 +51,7 @@ export interface ClientCredential {
   pkey?: PKey;
 }
 
-export type DN = {[key: string]: string };
+export type DN = { [key: string]: string };
 
 export interface Cert {
   version: number;

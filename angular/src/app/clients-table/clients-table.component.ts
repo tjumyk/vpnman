@@ -18,7 +18,7 @@ export class ClientsTableComponent implements OnInit {
 
   set newClient(client: Client) {
     this._newClient = client;
-    if(client)
+    if (client)
       this.processClient(client);
   }
 

@@ -21,7 +21,7 @@ export class LogTableComponent implements OnInit {
   flag_levels = {};
 
   constructor() {
-    for(let i in this.level_flags){
+    for (let i in this.level_flags) {
       let flag = this.level_flags[i];
       this.flag_levels[flag] = i;
     }
@@ -33,7 +33,7 @@ export class LogTableComponent implements OnInit {
         let max_level = 0;
         for (let i = 0; i < line.flags.length; ++i) {
           let level = this.flag_levels[line.flags[i]];
-          if (level > max_level){
+          if (level > max_level) {
             max_level = level;
           }
         }

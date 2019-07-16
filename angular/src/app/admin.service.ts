@@ -14,13 +14,14 @@ export class RouteForm {
 })
 export class AdminService {
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {
+  }
 
-  getClients():Observable<Client[]>{
+  getClients(): Observable<Client[]> {
     return this.http.get<Client[]>('api/admin/clients')
   }
 
-  getClient(cid: number): Observable<Client>{
+  getClient(cid: number): Observable<Client> {
     return this.http.get<Client>(`api/admin/clients/${cid.toString()}`)
   }
 
@@ -28,11 +29,11 @@ export class AdminService {
     return this.http.get<Client>(`api/admin/import-client/${user_id}`)
   }
 
-  revokeCredential(cid: number): Observable<ClientCredential>{
+  revokeCredential(cid: number): Observable<ClientCredential> {
     return this.http.put<ClientCredential>(`api/admin/credentials/${cid.toString()}/revoke`, null)
   }
 
-  unrevokeCredential(cid: number): Observable<ClientCredential>{
+  unrevokeCredential(cid: number): Observable<ClientCredential> {
     return this.http.delete<ClientCredential>(`api/admin/credentials/${cid.toString()}/revoke`)
   }
 
@@ -44,23 +45,23 @@ export class AdminService {
     return this.http.get<OpenVPNInfo>('api/admin/manage/info')
   }
 
-  getManagementLog(): Observable<OpenVPNLogLine[]>{
+  getManagementLog(): Observable<OpenVPNLogLine[]> {
     return this.http.get<OpenVPNLogLine[]>('api/admin/manage/log');
   }
 
-  managementClientKill(cid: number): Observable<any>{
+  managementClientKill(cid: number): Observable<any> {
     return this.http.get(`api/admin/manage/client-kill/${cid}`)
   }
 
-  managementSoftRestart(): Observable<any>{
+  managementSoftRestart(): Observable<any> {
     return this.http.get('api/admin/manage/soft-restart')
   }
 
-  managementHardRestart(): Observable<any>{
+  managementHardRestart(): Observable<any> {
     return this.http.get('api/admin/manage/hard-restart')
   }
 
-  managementShutdown(): Observable<any>{
+  managementShutdown(): Observable<any> {
     return this.http.get('api/admin/manage/shutdown')
   }
 

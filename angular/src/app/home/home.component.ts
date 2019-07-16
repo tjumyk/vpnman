@@ -42,8 +42,8 @@ export class HomeComponent implements OnInit {
 
             // find the first non-revoked credential as the default active credential
             this.activeCredential = undefined;
-            for(let cred of client.credentials){
-              if(!cred.is_revoked){
+            for (let cred of client.credentials) {
+              if (!cred.is_revoked) {
                 this.activeCredential = cred;
                 break;
               }

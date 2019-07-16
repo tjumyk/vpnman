@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {BasicError, Client} from "../models";
 import {ClientService} from "../client.service";
 import {finalize} from "rxjs/operators";

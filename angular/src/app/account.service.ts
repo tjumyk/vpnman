@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {User} from "./models";
 import {HttpClient} from "@angular/common/http";
 import {Observable, of} from "rxjs";
@@ -10,11 +10,12 @@ import {tap} from "rxjs/operators";
 export class AccountService {
   private user: User;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {
+  }
 
-  static isAdmin(user:User): boolean{
-    for(let group of user.groups){
-      if(group.name == 'admin')
+  static isAdmin(user: User): boolean {
+    for (let group of user.groups) {
+      if (group.name == 'admin')
         return true;
     }
     return false;

@@ -115,15 +115,15 @@ export class AdminConfigComponent implements OnInit {
   serverOperation(op: string, btn: HTMLElement) {
     let api;
     if (op == 'soft-restart') {
-      if(!confirm('Really want to do a soft restart? Soft restart may not apply the latest configuration. If you want to make sure the latest configuration is used, please try "hard restart" instead.'))
+      if (!confirm('Really want to do a soft restart? Soft restart may not apply the latest configuration. If you want to make sure the latest configuration is used, please try "hard restart" instead.'))
         return;
       api = this.adminService.managementSoftRestart();
     } else if (op == 'hard-restart') {
-      if(!confirm('Really want to do a hard restart?'))
+      if (!confirm('Really want to do a hard restart?'))
         return;
       api = this.adminService.managementHardRestart();
     } else if (op == 'shutdown') {
-      if(!confirm('Really want to shutdown the server? You will have to start the server manually from the command line.'))
+      if (!confirm('Really want to shutdown the server? You will have to start the server manually from the command line.'))
         return;
       api = this.adminService.managementShutdown();
     } else
