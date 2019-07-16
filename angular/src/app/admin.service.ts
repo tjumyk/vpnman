@@ -1,7 +1,13 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {Client, ClientCredential, OpenVPNInfo, OpenVPNLogLine} from "./models";
+import {Client, ClientCredential, OpenVPNInfo, OpenVPNLogLine, RouteRule} from "./models";
+
+export class RouteForm {
+  ip: string;
+  mask: string;
+  description?: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -56,5 +62,25 @@ export class AdminService {
 
   managementShutdown(): Observable<any>{
     return this.http.get('api/admin/manage/shutdown')
+  }
+
+  getRoutes(): Observable<RouteRule[]> {
+    return this.http.get<RouteRule[]>('/api/admin/server/routes')
+  }
+
+  getRoute(rid: number): Observable<RouteRule> {
+    return this.http.get<RouteRule>(`/api/admin/server/routes/${rid}`)
+  }
+
+  addRoute(form: RouteForm): Observable<RouteRule> {
+    return this.http.post<RouteRule>('/api/admin/server/routes', form)
+  }
+
+  updateRoute(rid: number, form: RouteForm): Observable<RouteRule> {
+    return this.http.put<RouteRule>(`/api/admin/server/routes/${rid}`, form)
+  }
+
+  deleteRoute(rid: number): Observable<any> {
+    return this.http.delete(`/api/admin/server/routes/${rid}`)
   }
 }

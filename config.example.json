@@ -25,6 +25,10 @@
       "name": "server"
     }
   },
+  "SERVER_CONFIG_SERVICE":{
+    "server_config_path": "/etc/openvpn/server.conf",
+    "server_base_config_path": "/etc/openvpn/server_base.conf"
+  },
   "MANAGEMENT_TOOL": {
     "server_host": "localhost",
     "server_port": 7505,

@@ -138,3 +138,15 @@ export interface OpenVPNInfo {
   status: OpenVPNStatus;
   version: OpenVPNVersion;
 }
+
+/* Server Config */
+
+export interface RouteRule {
+  id: number;
+  ip: string;
+  mask: string;
+  description?: string;
+
+  created_at: string;
+  modified_at: string;
+}

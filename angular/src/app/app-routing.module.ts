@@ -11,6 +11,7 @@ import {AdminClientsComponent} from "./admin-clients/admin-clients.component";
 import {AdminComponent} from "./admin/admin.component";
 import {AdminStatusComponent} from "./admin-status/admin-status.component";
 import {AdminLogComponent} from "./admin-log/admin-log.component";
+import {AdminConfigComponent} from "./admin-config/admin-config.component";
 
 
 const routes: Routes = [
@@ -28,6 +29,7 @@ const routes: Routes = [
           {path: '', pathMatch: 'full', redirectTo: '/admin/status'},
           {path: 'status', component: AdminStatusComponent},
           {path: 'log', component: AdminLogComponent},
+          {path: 'config', component: AdminConfigComponent},
           {
             path: 'clients',
             children: [

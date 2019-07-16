@@ -21,6 +21,7 @@ import { AdminStatusComponent } from './admin-status/admin-status.component';
 import { AdminComponent } from './admin/admin.component';
 import {FormsModule} from "@angular/forms";
 import { ModalComponent } from './modal/modal.component';
+import { AdminConfigComponent } from './admin-config/admin-config.component';
 
 @NgModule({
   declarations: [
@@ -41,6 +42,7 @@ import { ModalComponent } from './modal/modal.component';
     AdminStatusComponent,
     AdminComponent,
     ModalComponent,
+    AdminConfigComponent,
   ],
   imports: [
     BrowserModule,

@@ -69,3 +69,21 @@ class ClientCredential(db.Model):
                 pkey_dict = pkey.to_dict()
             d['pkey'] = pkey_dict
         return d
+
+
+class Route(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    ip = db.Column(db.String(46), nullable=False)  # max length of textual IPv6 address is 45
+    mask = db.Column(db.String(46), nullable=False)
+
+    description = db.Column(db.String(128))
+
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    modified_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def __repr__(self):
+        return '<Route [%r] %r %r>' % (self.id, self.ip, self.mask)
+
+    def to_dict(self):
+        return dict(id=self.id, ip=self.ip, mask=self.mask, description=self.description,
+                    created_at=self.created_at, modified_at=self.modified_at)

@@ -10,7 +10,9 @@ from auth_connect import oauth
 from models import db, ClientCredential
 from services.client import ClientService, ClientServiceError
 from services.credential import CredentialService, CredentialServiceError
+from services.server_config import ServerConfigService, ServerConfigServiceError
 from tools.cert import CertTool
+from tools.config import ConfigTool
 from tools.manage import ManagementTool, ManagementToolError
 
 app = Flask(__name__)
@@ -20,6 +22,7 @@ app.config.from_mapping(_config)
 
 db.init_app(app)
 CredentialService.init(_config.get('CREDENTIAL_SERVICE', {}))
+ServerConfigService.init(_config.get('SERVER_CONFIG_SERVICE', {}))
 ManagementTool.init(_config.get('MANAGEMENT_TOOL', {}))
 
 
@@ -308,6 +311,47 @@ def api_admin_manage_shutdown():
         return jsonify(msg=e.msg, detail=e.detail), 500
 
 
+@app.route('/api/admin/server/routes', methods=['GET', 'POST'])
+@oauth.requires_admin
+def api_admin_server_routes():
+    try:
+        if request.method == 'GET':
+            return jsonify([route.to_dict() for route in ServerConfigService.get_routes()])
+        else:  # POST
+            params = request.json
+            route = ServerConfigService.add_route(params.get('ip'), params.get('mask'), params.get('description'))
+            db.session.commit()
+            ServerConfigService.update_config()
+            return jsonify(route.to_dict())
+    except ServerConfigServiceError as e:
+        return jsonify(msg=e.msg, detail=e.detail), 400
+
+
+@app.route('/api/admin/server/routes/<int:rid>', methods=['GET', 'PUT', 'DELETE'])
+@oauth.requires_admin
+def api_admin_server_route(rid):
+    try:
+        route = ServerConfigService.get_route(rid)
+        if route is None:
+            return jsonify(msg='route not found'), 404
+
+        if request.method == 'GET':
+            return jsonify(route.to_dict())
+        elif request.method == 'PUT':
+            params = request.json
+            ServerConfigService.update_route(route, params.get('ip'), params.get('mask'), params.get('description'))
+            db.session.commit()
+            ServerConfigService.update_config()
+            return jsonify(route.to_dict())
+        else:  # DELETE
+            db.session.delete(route)
+            db.session.commit()
+            ServerConfigService.update_config()
+            return "", 204
+    except ServerConfigServiceError as e:
+        return jsonify(msg=e.msg, detail=e.detail), 400
+
+
 @app.cli.command()
 def create_db():
     db.create_all()
@@ -377,6 +421,28 @@ def dump(file_path: str, file_type: str):
         print(CertTool.load_crl_file(file_path).dump_text())
     else:
         print('File type not supported')
+
+
+@app.cli.command()
+@click.argument('config_path')
+@click.option('-c/-C', '--clear/--no-clear', default=False)
+def import_routes(config_path: str, clear: bool):
+    configs = ConfigTool.load_server_config(config_path)
+    routes = ConfigTool.extract_server_routes_from_configs(configs)
+
+    if clear:
+        for route in ServerConfigService.get_routes():
+            db.session.delete(route)
+
+    if len(config_path) > 100:
+        description = 'Imported from ...%s' % config_path[-100:]
+    else:
+        description = 'Imported from %s' % config_path
+
+    for ip, mask in routes:
+        if clear or not ServerConfigService.get_route_by_ip_mask(ip, mask):
+            ServerConfigService.add_route(ip, mask, description)
+    db.session.commit()
 
 
 if __name__ == '__main__':
