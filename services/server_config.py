@@ -43,7 +43,7 @@ class ServerConfigService:
 
     @staticmethod
     def get_routes() -> List[Route]:
-        return Route.query.all()
+        return Route.query.order_by(Route.id).all()
 
     @classmethod
     def add_route(cls, ip: str, mask: str, description: str = None) -> Route:
