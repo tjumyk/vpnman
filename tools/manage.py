@@ -286,12 +286,28 @@ class ManagementSession:
             self._send('client-kill %d' % cid)
             self._recv()
 
+    def signal(self, signal: str):
+        with self._cmd_lock:
+            if signal not in ManagementTool.signals:
+                raise ManagementToolError('invalid signal')
+
+            self._send('signal %s' % signal)
+            self._recv()
+
 
 class ManagementTool:
     _server_host = 'localhost'
     _server_port = 7505
     _socket_timeout = 3  # seconds
     _socket_buffer_size = 4096
+
+    # signals
+    SIGUSR1 = 'SIGUSR1'
+    SIGHUP = 'SIGHUP'
+    SIGUSR2 = 'SIGUSR2'
+    SIGTERM = 'SIGTERM'
+    SIGINT = 'SIGINT'
+    signals = {SIGUSR1, SIGHUP, SIGUSR2, SIGTERM, SIGINT}
 
     @classmethod
     def init(cls, config: dict):

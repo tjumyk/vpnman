@@ -45,4 +45,16 @@ export class AdminService {
   managementClientKill(cid: number): Observable<any>{
     return this.http.get(`api/admin/manage/client-kill/${cid}`)
   }
+
+  managementSoftRestart(): Observable<any>{
+    return this.http.get('api/admin/manage/soft-restart')
+  }
+
+  managementHardRestart(): Observable<any>{
+    return this.http.get('api/admin/manage/hard-restart')
+  }
+
+  managementShutdown(): Observable<any>{
+    return this.http.get('api/admin/manage/shutdown')
+  }
 }

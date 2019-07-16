@@ -275,6 +275,39 @@ def api_admin_manage_client_kill(cid: int):
         return jsonify(msg=e.msg, detail=e.detail), 500
 
 
+@app.route('/api/admin/manage/soft-restart')
+@oauth.requires_admin
+def api_admin_manage_soft_restart():
+    try:
+        with ManagementTool.connect() as sess:
+            sess.signal(ManagementTool.SIGUSR1)
+            return "", 204
+    except ManagementToolError as e:
+        return jsonify(msg=e.msg, detail=e.detail), 500
+
+
+@app.route('/api/admin/manage/hard-restart')
+@oauth.requires_admin
+def api_admin_manage_hard_restart():
+    try:
+        with ManagementTool.connect() as sess:
+            sess.signal(ManagementTool.SIGHUP)
+            return "", 204
+    except ManagementToolError as e:
+        return jsonify(msg=e.msg, detail=e.detail), 500
+
+
+@app.route('/api/admin/manage/shutdown')
+@oauth.requires_admin
+def api_admin_manage_shutdown():
+    try:
+        with ManagementTool.connect() as sess:
+            sess.signal(ManagementTool.SIGINT)
+            return "", 204
+    except ManagementToolError as e:
+        return jsonify(msg=e.msg, detail=e.detail), 500
+
+
 @app.cli.command()
 def create_db():
     db.create_all()
