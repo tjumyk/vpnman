@@ -74,6 +74,7 @@ class ClientCredential(db.Model):
 class Route(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     ip = db.Column(db.String(46), nullable=False)  # max length of textual IPv6 address is 45
+    # reference: INET6_ADDRSTRLEN ( /usr/include/arpa/inet.h => /usr/include/netinet/in.h )
     mask = db.Column(db.String(46), nullable=False)
 
     description = db.Column(db.String(128))

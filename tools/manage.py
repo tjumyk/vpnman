@@ -301,7 +301,7 @@ class ManagementTool:
     _socket_timeout = 3  # seconds
     _socket_buffer_size = 4096
 
-    # signals
+    # signals (reference: https://openvpn.net/community-resources/controlling-a-running-openvpn-process/)
     SIGUSR1 = 'SIGUSR1'
     SIGHUP = 'SIGHUP'
     SIGUSR2 = 'SIGUSR2'
