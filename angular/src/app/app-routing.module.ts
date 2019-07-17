@@ -12,6 +12,7 @@ import {AdminComponent} from "./admin/admin.component";
 import {AdminStatusComponent} from "./admin-status/admin-status.component";
 import {AdminLogComponent} from "./admin-log/admin-log.component";
 import {AdminConfigComponent} from "./admin-config/admin-config.component";
+import {ClientSetupComponent} from "./client-setup/client-setup.component";
 
 
 const routes: Routes = [
@@ -20,6 +21,7 @@ const routes: Routes = [
     path: '',
     component: PageComponent,
     children: [
+      {path: 'client-setup', component: ClientSetupComponent},
       {path: 'my-client', component: MyClientComponent},
       {
         path: 'admin',

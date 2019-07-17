@@ -1,0 +1,352 @@
+<div class="ui breadcrumb">
+  <a routerLink="/" class="section">Home</a>
+  <i class="right angle icon divider"></i>
+  <div class="section active">Client Setup Manual</div>
+</div>
+<div class="ui menu labeled icon menu stackable six item fluid">
+  <a [ngClass]="{'active': activeOS=='Windows'}" (click)="activeOS='Windows'" class="item">
+    <i class="icon windows"></i>
+    Windows
+  </a>
+  <a [ngClass]="{'active': activeOS=='Mac OS'}" (click)="activeOS='Mac OS'" class="item">
+    <i class="icon apple"></i>
+    Mac OS
+  </a>
+  <a [ngClass]="{'active': activeOS=='Linux'}" (click)="activeOS='Linux'" class="item">
+    <i class="icon linux"></i>
+    Linux
+  </a>
+  <a [ngClass]="{'active': activeOS=='iOS'}" (click)="activeOS='iOS'" class="item">
+    <i class="icon apple"></i>
+    iOS
+  </a>
+  <a [ngClass]="{'active': activeOS=='Android'}" (click)="activeOS='Android'" class="item">
+    <i class="icon android"></i>
+    Android
+  </a>
+  <a [ngClass]="{'active': activeOS=='Other'}" (click)="activeOS='Other'" class="item">
+    <i class="icon asterisk"></i>
+    Other
+  </a>
+</div>
+
+<app-error [error]="error"></app-error>
+
+<app-client-config-download-modal [(show)]="showDownloadConfigModal" [credential]="activeCredential"
+                                  [isLinuxClient]="activeOS=='Linux'"></app-client-config-download-modal>
+
+<div *ngIf="activeOS=='Windows'">
+  <div class="ui header">
+    <div class="content">
+      <i class="icon windows"></i>
+      Setup in Windows
+    </div>
+  </div>
+  <ol class="ui list ordered">
+    <li class="item">
+      Download the Windows Installer from <a href="https://openvpn.net/community-downloads/" target="_blank">OpenVPN download page</a>.
+    </li>
+    <li class="item">Install OpenVPN with the downloaded installer.</li>
+    <li class="item">
+      Download your client configuration file by clicking the following button.
+      <div class="description">
+        <button class="ui button" [ngClass]="{'disabled': !activeCredential}" (click)="showDownloadConfigModal=true">
+          <i class="icon download"></i> Download Configuration File for Windows
+        </button>
+      </div>
+    </li>
+    <li class="item">
+      Move the configuration file that your just downloaded to <code>C:\Program Files\OpenVPN\config</code>.
+    </li>
+    <li class="item">
+      Run the OpenVPN program and then you may find it in the system tray at the right bottom of the screen.
+    </li>
+    <li class="item">
+      Right click the icon of the OpenVPN, then click 'Connect' at the top of the popup menu. Your device will be connected to the OpenVPN server in a few seconds.
+    </li>
+  </ol>
+</div>
+
+<div *ngIf="activeOS=='Mac OS'">
+  <div class="ui header">
+    <div class="content">
+      <i class="icon apple"></i>
+      Setup in Mac OS
+    </div>
+  </div>
+  <ol class="ui list">
+    <li class="item">
+      <div class="header">Download and install a client that supports the OpenVPN protocol</div>
+      <div class="description">Recommended client for Mac OS is <a href="https://tunnelblick.net/" target="_blank">Tunnelblick</a>.</div>
+    </li>
+    <li class="item">
+      <div class="header">Download your client configuration file by clicking the following button.</div>
+      <div class="description">
+        <button class="ui button" [ngClass]="{'disabled': !activeCredential}" (click)="showDownloadConfigModal=true">
+          <i class="icon download"></i> Download Configuration File for Mac OS
+        </button>
+      </div>
+    </li>
+    <li class="item">
+      <div class="header">Double-click the configuration file to import it</div>
+    </li>
+    <li class="item">
+      <div class="header">Connect to the OpenVPN server</div>
+      <div class="description">
+        From the top right of the screen, find the Tunnelblick icon. Click the icon and select the name of the imported configuration from its menu.
+      </div>
+      <div class="ui list">
+        <div class="item">
+          <i class="icon right triangle"></i>
+          <div class="content">
+            If it asks you something about 'down-root plugin', we recommend you accept that plugin. <br/>
+            It will downgrade the process owner to a non-privileged user to make it safer.
+          </div>
+        </div>
+        <div class="item">
+          <i class="icon right triangle"></i>
+          <div class="content">
+            If it asks you something like 'same public IP check', you should disable it. <br/>
+            If configured correctly, the OpenVPN client should only convey connections to specific IP ranges through the VPN
+            tunnel and all the other connections are not affected. So your public IP should never change.
+          </div>
+        </div>
+      </div>
+    </li>
+  </ol>
+</div>
+
+<div *ngIf="activeOS=='Linux'">
+  <div class="ui header">
+    <div class="content">
+      <i class="icon linux"></i>
+      Setup in Ubuntu 18.04
+    </div>
+  </div>
+  <ol class="ui list ordered">
+    <li class="item">
+      <div class="header">Install Network Manager Plugin for OpenVPN</div>
+      <div class="content">
+        <pre><code>sudo apt-get install network-manager-openvpn-gnome</code></pre>
+      </div>
+    </li>
+    <li class="item">
+      <div class="header">
+        Download your client configuration file by clicking the following button
+      </div>
+      <div class="description">
+        <button class="ui button" [ngClass]="{'disabled': !activeCredential}" (click)="showDownloadConfigModal=true">
+          <i class="icon download"></i> Download Configuration File for Linux
+        </button>
+      </div>
+    </li>
+    <li class="item">
+      <div class="header">Import the client configuration file into the Network Manager</div>
+      <ol class="ui list">
+        <li class="item">Click the top right corner of the screen, click 'VPN off' and then choose 'VPN Settings'.</li>
+        <li class="item">Click <i class="icon plus"></i> button at the right side of the 'VPN' title.</li>
+        <li class="item">Choose 'Import from file...' at the bottom of the list.</li>
+        <li class="item">Select the client configuration file that you just downloaded.</li>
+        <li class="item">(Optional) Rename the connection name to 'unswkg' if you like.</li>
+        <li class="item">
+          Click the 'IPv4' tab, tick the 'Use this connection only for resources on its network' at the bottom. <br/>
+          If you don't do this, all your network traffic will be transmitted through the VPN tunnel, and this will potentially flood our VPN server and increase the loading time of all your network requests.
+        </li>
+        <li class="item">Click 'Add' at the top right corner of the window to save this configuration.</li>
+        <li class="item">If your are not the only user of your device, click the <i class="icon cog"></i> button at the right side of the new VPN configuration, and then remove the tick on 'Make available to other users'.</li>
+      </ol>
+    </li>
+    <li class="item">
+      <div class="header">Connect to the OpenVPN server via the Network Manager.</div>
+      <div class="content">Click the top right corner of the screen again, click 'VPN off' and then click 'Connect' (or the name of the configuration when you have multiple VPN configurations) to start the connection.</div>
+    </li>
+  </ol>
+
+  <div class="ui divider"></div>
+
+  <div class="ui header">
+    <div class="content">
+      <i class="icon linux"></i>
+      Setup in Ubuntu 16.04
+    </div>
+  </div>
+  <ol class="ui list ordered">
+    <li class="item">
+      <div class="header">Install Network Manager Plugin for OpenVPN</div>
+      <div class="content">
+        <pre><code>sudo apt-get install network-manager-openvpn-gnome</code></pre>
+      </div>
+    </li>
+    <li class="item">
+      <div class="header">
+        Download your client configuration file by clicking the following button
+      </div>
+      <div class="description">
+        <button class="ui button" [ngClass]="{'disabled': !activeCredential}" (click)="showDownloadConfigModal=true">
+          <i class="icon download"></i> Download Configuration File for Linux
+        </button>
+      </div>
+    </li>
+    <li class="item">
+      <div class="header">Import the client configuration file into the Network Manager</div>
+      <ol class="ui list">
+        <li class="item">Click the network icon at the top right of the screen, choose 'Edit Connections' at the bottom.</li>
+        <li class="item">Click 'Add' button at the top right side.</li>
+        <li class="item">Choose 'Import a saved VPN configuration' at the bottom of the list, and then click 'Create'.</li>
+        <li class="item">Select the client configuration file that you just downloaded.</li>
+        <li class="item">(Optional) Rename the connection name to 'unswkg' if you like.</li>
+        <li class="item">If you are not the only user of your device, go to the 'General' tab, remove the tick on 'All users may connect to this network'.</li>
+        <li class="item">Click the 'IPv4 Settings' tab, click 'Routes' at the bottom right.</li>
+        <li class="item">Tick 'Use this connection only for resources on its network'. <br/>
+          If you don't do this, all your network traffic will be transmitted through the VPN tunnel, and this will potentially flood our VPN server and increase the loading time of all your network requests.
+        </li>
+        <li class="item">Click 'Save' to save this configuration</li>
+      </ol>
+    </li>
+    <li class="item">
+      <div class="header">Connect to the OpenVPN server via the Network Manager</div>
+      <div class="content">Click the network icon at the top right of the screen again, and then click the name of your imported configuration from the VPN connections to start the connection.</div>
+    </li>
+  </ol>
+
+  <div class="ui divider"></div>
+
+  <div class="ui header">
+    <div class="content">
+      <i class="icon linux"></i>
+      Generic Setup in Other Linux Distributions
+    </div>
+  </div>
+  <ol class="ui list">
+    <li class="item">
+      <div class="header">
+        Install OpenVPN from the package manager in your OS
+      </div>
+      <div class="description">
+        You may use apt, pacman or dpkg etc. Please search for the 'openvpn' in your package manager catalog or download
+        packages from the <a href="https://openvpn.net/community-downloads/" target="_blank">OpenVPN download page</a>.
+      </div>
+    </li>
+    <li class="item">
+      <div class="header">
+        Download your client configuration file by clicking the following button
+      </div>
+      <div class="description">
+        <button class="ui button" [ngClass]="{'disabled': !activeCredential}" (click)="showDownloadConfigModal=true">
+          <i class="icon download"></i> Download Configuration File for Linux
+        </button>
+      </div>
+    </li>
+    <li class="item">
+      <div class="header">
+        (Optional) Import the client configuration file into a GUI Network Manager
+      </div>
+    </li>
+    <li class="item">
+      <div class="header">Connect to the OpenVPN server</div>
+      <div class="ui list">
+        <div class="item">
+          <i class="icon right triangle"></i>
+          <div class="content">
+            If you have imported the configuration file into the GUI Network Manager, you may simply click the
+            corresponding item in the network list to connect to the OpenVPN server.
+          </div>
+        </div>
+        <div class="item">
+          <i class="icon right triangle"></i>
+          <div class="content">
+            Otherwise, you may use the following command to connect to the OpenVPN server.
+            <pre><code>sudo openvpn --config YOUR_CLIENT_CONFIG.ovpn</code></pre>
+          </div>
+        </div>
+      </div>
+    </li>
+  </ol>
+</div>
+
+<div *ngIf="activeOS=='iOS'">
+  <div class="ui header">
+    <div class="content">
+      <i class="icon apple"></i>
+      Setup in iOS
+    </div>
+  </div>
+  <ol class="ui list ordered">
+    <li class="item">
+      Download and Install the OpenVPN Connect App from Apple Store <br/>
+      <a class="ui button black" href="https://apps.apple.com/us/app/id590379981" target="_blank"><i class="icon apple"></i> OpenVPN Connect</a>
+    </li>
+    <li class="item">
+      Download your client configuration file by clicking the following button.
+      <div class="description">
+        <button class="ui button" [ngClass]="{'disabled': !activeCredential}" (click)="showDownloadConfigModal=true">
+          <i class="icon download"></i> Download Configuration File for iOS
+        </button>
+      </div>
+    </li>
+    <li class="item">
+      Run the OpenVPN Connect App and import the downloaded configuration file.
+    </li>
+    <li class="item">
+      Click the imported configuration and start the connection.
+    </li>
+  </ol>
+</div>
+
+<div *ngIf="activeOS=='Android'">
+  <div class="ui header">
+    <div class="content">
+      <i class="icon android"></i>
+      Setup in Android
+    </div>
+  </div>
+  <ol class="ui list ordered">
+    <li class="item">
+      Download and Install the OpenVPN Connect App from Google Play <br/>
+      <a class="ui button green" href="https://play.google.com/store/apps/details?id=net.openvpn.openvpn" target="_blank"><i class="icon google play"></i> OpenVPN Connect</a>
+    </li>
+    <li class="item">
+      Download your client configuration file by clicking the following button.
+      <div class="description">
+        <button class="ui button" [ngClass]="{'disabled': !activeCredential}" (click)="showDownloadConfigModal=true">
+          <i class="icon download"></i> Download Configuration File for Android
+        </button>
+      </div>
+    </li>
+    <li class="item">
+      Run the OpenVPN Connect App and import the downloaded configuration file.
+    </li>
+    <li class="item">
+      Click the imported configuration and start the connection.
+    </li>
+  </ol>
+</div>
+
+<div *ngIf="activeOS=='Other'">
+  <div class="ui header">
+    <div class="content">
+      <i class="icon asterisk"></i>
+      Setup in Other OS
+    </div>
+  </div>
+  <ol class="ui list ordered">
+    <li class="item">
+      Find an appropriate app that supports OpenVPN protocol in your operating system. <br/>
+      If your operating system is a Linux-based desktop system, please check the manual for Linux instead.
+    </li>
+    <li class="item">
+      Download your client configuration file by clicking the following button.
+      <div class="description">
+        <button class="ui button" [ngClass]="{'disabled': !activeCredential}" (click)="showDownloadConfigModal=true">
+          <i class="icon download"></i> Download Configuration File for Other OS
+        </button>
+      </div>
+    </li>
+    <li class="item">
+      Run the client app and import the downloaded configuration file.
+    </li>
+    <li class="item">
+      Select the imported configuration and start the connection.
+    </li>
+  </ol>
+</div>

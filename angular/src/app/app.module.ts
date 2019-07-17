@@ -22,6 +22,8 @@ import {AdminComponent} from './admin/admin.component';
 import {FormsModule} from "@angular/forms";
 import {ModalComponent} from './modal/modal.component';
 import {AdminConfigComponent} from './admin-config/admin-config.component';
+import { ClientSetupComponent } from './client-setup/client-setup.component';
+import { ClientConfigDownloadModalComponent } from './client-config-download-modal/client-config-download-modal.component';
 
 @NgModule({
   declarations: [
@@ -43,6 +45,8 @@ import {AdminConfigComponent} from './admin-config/admin-config.component';
     AdminComponent,
     ModalComponent,
     AdminConfigComponent,
+    ClientSetupComponent,
+    ClientConfigDownloadModalComponent,
   ],
   imports: [
     BrowserModule,

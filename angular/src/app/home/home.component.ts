@@ -21,6 +21,9 @@ export class HomeComponent implements OnInit {
 
   activeCredential: ClientCredential;
 
+  downloadConfigForLinux: boolean;
+  showDownloadConfigModal: boolean;
+
   constructor(private accountService: AccountService,
               private clientService: ClientService) {
   }
@@ -54,5 +57,10 @@ export class HomeComponent implements OnInit {
       },
       error => this.error = error.error
     )
+  }
+
+  startDownload(is_linux: boolean){
+    this.showDownloadConfigModal=  true;
+    this.downloadConfigForLinux = is_linux;
   }
 }
