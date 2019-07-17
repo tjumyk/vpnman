@@ -56,11 +56,11 @@
   <div class="actions">
     <button class="ui inverted red basic button" (click)="show=false"><i class="icon times"></i> Cancel</button>
     <ng-container *ngIf="credential">
-      <a class="ui inverted green button" href="api/my-credentials/{{credential.id}}/export-config?linux=true" *ngIf="isLinuxClient; else btn_other_os">
+      <a class="ui inverted green button" href="api/my-credentials/{{credential.id}}/export-config?linux=true" (click)="startDownload()" *ngIf="isLinuxClient; else btn_other_os">
         <i class="icon check"></i> I Get It!
       </a>
       <ng-template #btn_other_os>
-        <a class="ui inverted green button" href="api/my-credentials/{{credential.id}}/export-config">
+        <a class="ui inverted green button" href="api/my-credentials/{{credential.id}}/export-config" (click)="startDownload()">
           <i class="icon check"></i> I Get It!
         </a>
       </ng-template>

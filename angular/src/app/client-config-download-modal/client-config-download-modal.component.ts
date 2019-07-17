@@ -28,4 +28,9 @@ export class ClientConfigDownloadModalComponent implements OnInit {
   ngOnInit() {
   }
 
+  startDownload(){
+    this.show = false;
+    return true; // do not cancel the event
+  }
+
 }
