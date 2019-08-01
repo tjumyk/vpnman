@@ -60,7 +60,7 @@ class ServerConfigService:
         if route is None:
             raise ServerConfigServiceError('route is required')
         existing_route = cls.get_route_by_ip_mask(ip, mask)
-        if existing_route.id != route.id:
+        if existing_route and existing_route.id != route.id:
             raise ServerConfigServiceError('duplicate route')
 
         cls._check_route_fields(ip, mask, description)
