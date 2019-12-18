@@ -10,8 +10,8 @@
     "ca_pkey_path": "/etc/openvpn/ca.key",
     "crl_path": "/etc/openvpn/crl.pem",
     "tls_auth_key_path": "/etc/openvpn/ta.key",
-    "client_base_config_path": "/etc/openvpn/client_base.conf",
-    "linux_client_base_config_path": "/etc/openvpn/client_base_linux.conf",
+    "client_base_config_path": "/etc/openvpn/client.conf.base",
+    "linux_client_base_config_path": "/etc/openvpn/client_linux.conf.base",
     "cert_valid_days": 3650,
     "crl_valid_days": 3650,
     "cert_subject_default_fields": {
@@ -27,7 +27,7 @@
   },
   "SERVER_CONFIG_SERVICE":{
     "server_config_path": "/etc/openvpn/server.conf",
-    "server_base_config_path": "/etc/openvpn/server_base.conf"
+    "server_base_config_path": "/etc/openvpn/server.conf.base"
   },
   "MANAGEMENT_TOOL": {
     "server_host": "localhost",
