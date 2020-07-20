@@ -43,7 +43,8 @@ oauth.init_app(app, login_callback=_login_callback)
 
 
 @app.route('/')
-@app.route('/terms/<path:path>')
+@app.route('/client-setup/<path:path>')
+@app.route('/my-client/<path:path>')
 @app.route('/admin/<path:path>')
 @oauth.requires_login
 def get_index_page(path=''):
