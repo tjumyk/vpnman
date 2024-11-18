@@ -14,7 +14,7 @@ class ManagementToolError(BasicError):
 
 
 class ManagementSession:
-    _supported_management_interface_versions = {'1'}
+    _supported_management_interface_versions = {'1', '5'}  # only listed versions are tested
 
     def __init__(self, _socket: socket.socket, buffer_size: int):
         self._socket = _socket
