@@ -33,8 +33,8 @@ class ClientCredential(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     client_id = db.Column(db.Integer, db.ForeignKey('client.id'), nullable=False)
 
-    cert = db.Column(db.Binary)
-    pkey = db.Column(db.Binary)
+    cert = db.Column(db.LargeBinary)
+    pkey = db.Column(db.LargeBinary)
 
     is_revoked = db.Column(db.Boolean, nullable=False, default=False)
     revoked_at = db.Column(db.DateTime)
