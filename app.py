@@ -448,4 +448,4 @@ def import_routes(config_path: str, clear: bool):
 
 
 if __name__ == '__main__':
-    app.run(host='localhost', port=8785)
+    app.run(host='localhost', port=5000)
