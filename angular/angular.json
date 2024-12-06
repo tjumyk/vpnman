@@ -50,6 +50,7 @@
             ],
             "styles": [
               "src/lib/semantic/semantic.min.css",
+              "src/fonts/styles.css",
               "src/styles.less"
             ],
             "scripts": [],
