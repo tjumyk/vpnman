@@ -18,9 +18,9 @@
         <ng-container *ngIf="client">
           <ng-container *ngIf="activeCredential; else no_active_credential">
             <div class="ui vertical buttons labeled icon fluid">
-              <a routerLink="/client-setup" class="ui button"><i class="icon book"></i>Client Setup Manual</a>
-              <button class="ui button" (click)="startDownload(true)"><i class="icon download"></i> Configuration File for Linux</button>
-              <button class="ui button" (click)="startDownload(false)"><i class="icon download"></i> Configuration File for Other OS</button>
+              <a routerLink="/client-setup" class="ui button violet"><i class="icon book"></i>Client Setup Manual</a>
+              <button class="ui button blue" (click)="startDownload(true)"><i class="icon download"></i> Configuration File for Linux</button>
+              <button class="ui button blue" (click)="startDownload(false)"><i class="icon download"></i> Configuration File for Other OS</button>
               <a routerLink="/my-client" class="ui button"><i class="icon user"></i>My Client Details</a>
             </div>
           </ng-container>
