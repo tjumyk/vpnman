@@ -1,6 +1,6 @@
 <div class="ui container">
   <div class="ui grid middle aligned stackable centered">
-    <div class="column six wide">
+    <div class="column twelve wide">
       <div class="ui center aligned header">
         <img src="static/assets/logo-256.png" alt="">
         VPN Manager
@@ -17,11 +17,63 @@
 
         <ng-container *ngIf="client">
           <ng-container *ngIf="activeCredential; else no_active_credential">
-            <div class="ui vertical buttons labeled icon fluid">
-              <a routerLink="/client-setup" class="ui button violet"><i class="icon book"></i>Client Setup Manual</a>
-              <button class="ui button blue" (click)="startDownload(true)"><i class="icon download"></i> Configuration File for Linux</button>
-              <button class="ui button blue" (click)="startDownload(false)"><i class="icon download"></i> Configuration File for Other OS</button>
-              <a routerLink="/my-client" class="ui button"><i class="icon user"></i>My Client Details</a>
+
+            <div class="ui stackable four doubling cards home-actions-cards">
+              <div class="card">
+                <div class="content center aligned">
+                  <i class="big linux icon"></i>
+                  <div class="header">Linux Config</div>
+                  <div class="meta">Download .ovpn for Linux</div>
+                </div>
+                <div class="extra content center aligned">
+                  <button class="ui fluid primary blue button" (click)="startDownload(true)">
+                    <i class="download icon"></i>
+                    Download
+                  </button>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="content center aligned">
+                  <i class="big desktop icon"></i>
+                  <div class="header">Other OS Config</div>
+                  <div class="meta">Windows / macOS config</div>
+                </div>
+                <div class="extra content center aligned">
+                  <button class="ui fluid primary blue button" (click)="startDownload(false)">
+                    <i class="download icon"></i>
+                    Download
+                  </button>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="content center aligned">
+                  <i class="big cog icon"></i>
+                  <div class="header">Setup Guide</div>
+                  <div class="meta">Read the client manual</div>
+                </div>
+                <div class="extra content center aligned">
+                  <a routerLink="/client-setup" class="ui fluid basic violet button">
+                    <i class="file alternate outline icon"></i>
+                    View guide
+                  </a>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="content center aligned">
+                  <i class="big user icon"></i>
+                  <div class="header">My Client</div>
+                  <div class="meta">View client details</div>
+                </div>
+                <div class="extra content center aligned">
+                  <a routerLink="/my-client" class="ui fluid button basic black">
+                    <i class="info circle icon"></i>
+                    View details
+                  </a>
+                </div>
+              </div>
             </div>
           </ng-container>
 
