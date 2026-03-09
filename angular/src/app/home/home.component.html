@@ -75,6 +75,22 @@
                 </div>
               </div>
             </div>
+
+            <div class="ui tiny center aligned message" *ngIf="loadingServerStatus">
+              <i class="spinner loading icon"></i>
+              Checking OpenVPN server status...
+            </div>
+
+            <div class="ui tiny center aligned message" *ngIf="!loadingServerStatus && serverStatus">
+              <ng-container *ngIf="serverStatus.online; else server_offline">
+                <i class="green circle icon"></i>
+                OpenVPN server is <strong>online</strong>.
+              </ng-container>
+              <ng-template #server_offline>
+                <i class="red exclamation circle icon"></i>
+                OpenVPN server status is currently <strong>unavailable</strong>.
+              </ng-template>
+            </div>
           </ng-container>
 
           <ng-template #no_active_credential>

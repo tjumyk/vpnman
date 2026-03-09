@@ -139,6 +139,10 @@ export interface OpenVPNInfo {
   version: OpenVPNVersion;
 }
 
+export interface OpenVPNServerStatus {
+  online: boolean;
+}
+
 /* Server Config */
 
 export interface RouteRule {

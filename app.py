@@ -42,6 +42,11 @@ def _login_callback(user: oauth.User):
 oauth.init_app(app, login_callback=_login_callback)
 
 
+_SERVER_STATUS_CACHE_TTL = app.config.get('SERVER_STATUS_CACHE_TTL', 5)
+_server_status_cache_online = None
+_server_status_cache_expires_at = 0.0
+
+
 @app.route('/')
 @app.route('/client-setup')
 @app.route('/my-client')
@@ -68,6 +73,50 @@ def page_not_found(error):
 def api_version():
     git_version = subprocess.check_output(['git', 'describe', '--tags']).decode().strip()
     return jsonify(version=git_version)
+
+
+@app.route('/api/server/status')
+@oauth.requires_login
+def api_server_status():
+    """
+    Lightweight OpenVPN server status for the home page.
+    Returns whether the management interface reports the server as CONNECTED.
+
+    To avoid hammering the OpenVPN management interface, all users see a cached
+    value that is refreshed at most every `_SERVER_STATUS_CACHE_TTL` seconds.
+    """
+    global _server_status_cache_online, _server_status_cache_expires_at
+
+    now = time.time()
+
+    # Serve cached status when it is still fresh
+    if _server_status_cache_expires_at >= now and _server_status_cache_online is not None:
+        return jsonify(online=_server_status_cache_online)
+
+    try:
+        with ManagementTool.connect() as sess:
+            states = sess.state(1)
+            state = states[0] if states else None
+
+            online = bool(state and state.get('state') == 'CONNECTED')
+
+            _server_status_cache_online = online
+            _server_status_cache_expires_at = now + _SERVER_STATUS_CACHE_TTL
+
+            return jsonify(
+                online=online
+            )
+    except ManagementToolError as e:
+        # Treat management errors as "offline" but do not fail the request.
+        # Also cache the offline status to avoid repeated failed connections to
+        # the management interface.
+        _server_status_cache_online = False
+        _server_status_cache_expires_at = time.time() + _SERVER_STATUS_CACHE_TTL
+        return jsonify(
+            online=False,
+            msg=e.msg,
+            detail=e.detail
+        )
 
 
 @app.route('/api/me')
