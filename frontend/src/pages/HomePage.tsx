@@ -3,7 +3,6 @@ import { IconCircleCheck, IconCircleX, IconDownload, IconSettings, IconUser } fr
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { useMediaQuery } from '@mantine/hooks'
 
 import { fetchMyClient, fetchServerStatus } from '@/api'
 import { ClientConfigDownloadModal } from '@/components/ClientConfigDownloadModal'
@@ -13,7 +12,6 @@ import { useI18n } from '@/hooks/useI18n'
 
 export function HomePage(): React.ReactElement {
   const { t } = useI18n()
-  const isMobile = useMediaQuery('(max-width: 48em)')
   const { data: user } = useAuthUser()
   const { data: client, isLoading: loadingClient, error: clientError } = useQuery({
     queryKey: ['my-client', 'home'],
@@ -30,7 +28,7 @@ export function HomePage(): React.ReactElement {
   const activeCredential = useMemo(() => client?.credentials.find((cred) => !cred.is_revoked), [client])
 
   return (
-    <Stack>
+    <Stack pt={{ base: 'sm', md: 'xl' }}>
       <ErrorMessage error={clientError} />
       <ClientConfigDownloadModal
         opened={showDownloadModal}
@@ -47,8 +45,16 @@ export function HomePage(): React.ReactElement {
 
       <Center>
         <Stack w="100%" maw={1200}>
+          <Stack gap={2}>
+            <Text fw={700} size="xl">
+              {t('homeHeroTitle')}
+            </Text>
+            <Text c="dimmed" size="sm">
+              {t('homeHeroSubtitle')}
+            </Text>
+          </Stack>
           {client && activeCredential ? (
-            <Center style={isMobile ? undefined : { minHeight: '50vh' }}>
+            <Center>
               <SimpleGrid cols={{ base: 1, md: 2, xl: 4 }} w="100%">
                 <Card withBorder>
                   <Text fw={700}>{t('homeLinuxConfigTitle')}</Text>
