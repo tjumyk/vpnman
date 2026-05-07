@@ -50,6 +50,7 @@ _server_status_cache_expires_at = 0.0
 @app.route('/')
 @app.route('/client-setup')
 @app.route('/my-client')
+@app.route('/admin')
 @app.route('/admin/<path:path>')
 @oauth.requires_login
 def get_index_page(path=''):
