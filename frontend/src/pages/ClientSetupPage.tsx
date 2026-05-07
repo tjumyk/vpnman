@@ -34,7 +34,7 @@ export function ClientSetupPage(): React.ReactElement {
   const section = setupSections.find((item) => item.key === activeOS) ?? setupSections[setupSections.length - 1]
 
   return (
-    <Stack>
+    <Stack maw={980} mx="auto" w="100%">
       <ErrorMessage error={error} />
       <SegmentedControl
         value={activeOS}
@@ -50,11 +50,11 @@ export function ClientSetupPage(): React.ReactElement {
         isLinuxClient={activeOS === 'Linux'}
       />
 
-      <Card withBorder>
+      <Card withBorder p="lg">
         <Text fw={700} size="lg" mb="md">
           {section.title}
         </Text>
-        <List type="ordered">
+        <List type="ordered" spacing="xs">
           {section.steps.map((step, index) => (
             <List.Item key={`${section.key}-${index}`}>{step}</List.Item>
           ))}
