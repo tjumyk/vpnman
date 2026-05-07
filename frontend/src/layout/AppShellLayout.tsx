@@ -41,7 +41,7 @@ export function AppShellLayout(): React.ReactElement {
   )
 
   const displayName = user ? user.nickname || user.name : ''
-  const logoSrc = '/static/assets/logo-128.png'
+  const logoSrc = `${import.meta.env.BASE_URL}logo-256.png`
 
   return (
     <AppShell
