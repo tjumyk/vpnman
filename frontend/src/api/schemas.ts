@@ -62,7 +62,7 @@ export const clientSchema = z.object({
   id: z.number(),
   user_id: z.number(),
   name: z.string(),
-  email: z.string(),
+  email: z.union([z.string(), z.null()]).optional().transform((v) => v ?? ''),
   created_at: z.string(),
   modified_at: z.string(),
   user: userSchema.optional(),
